@@ -34,12 +34,14 @@
 #define KNOB_ASSERT assert
 #define KNOB_REALLOC realloc
 #define KNOB_FREE free
-
+#ifdef _WIN32 // Look mommy, no kiddy wheels....
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #define _BSD_SOURCE
 #define _XOPEN_SOURCE 700
@@ -65,6 +67,15 @@
 #    include <direct.h>
 #    include <shellapi.h>
 typedef HANDLE Knob_Fd;
+#if !defined(__MINGW64__) || !defined(__MINGW32__)
+#define DLL_API __declspec(dllexport)
+#define getcwd(buffer,size) _getcwd(buffer,size)
+#define mkdir(path) _mkdir(path)
+#define chdir(dirname) _chdir(dirname)
+#define strdup(strSource) _strdup(strSource)
+#else
+#define DLL_API
+#endif
 #else
 typedef int Knob_Fd;
 #    include <sys/types.h>
@@ -207,6 +218,7 @@ bool knob_read_entire_file(const char *path, Knob_String_Builder *sb);
 #ifdef _WIN32
 typedef HANDLE Knob_Proc;
 #define KNOB_INVALID_PROC INVALID_HANDLE_VALUE
+LPSTR GetLastErrorAsString(void);
 #else
 typedef int Knob_Proc;
 #define KNOB_INVALID_PROC (-1)
@@ -330,6 +342,7 @@ static const char *compilerpp_names[][2] = {
 #endif
 #define GET_COMPILER_NAME(cmp) compiler_names[cmp][0] ,compiler_names[cmp][1]
 #define GET_COMPILERPP_NAME(cmp) compilerpp_names[cmp][0] ,compilerpp_names[cmp][1]
+
 #define CONFIG_PATH "./build/config.h"
 #define PLUG_PATH "./build/plug.h"
 
@@ -374,7 +387,7 @@ void knob_config_add_includes(Knob_Config* config,const char* filepaths[],size_t
 * Add files with the extensions `*.c` and `*.cpp` to the build config.
 */
 void knob_config_add_files(Knob_Config* config,const char* filepaths[],size_t len);
-int knob_config_build(Knob_Config* config,Knob_File_Paths* outs,int debug);
+int knob_config_build(Knob_Config* config,Knob_File_Paths* outs);
 void knob_create_plug(void);
 //@TODO: Add reload_plug_here
 void knob_cmd_add_compiler(Knob_Cmd* cmd,Knob_Config* config);
@@ -404,7 +417,7 @@ typedef int (*submodule_entrypoint)(Knob_Config* /*parent_config*/, Knob_File_Pa
 #ifdef KNOB_SUBMODULE
 #define MAIN(project_name) \
  static char* proj_name = #project_name; \
- int project_name##_entrypoint(Knob_Config* parent_config, Knob_File_Paths* project_name##_link_files, int argc,char** argv)
+ DLL_API int project_name##_entrypoint(Knob_Config* parent_config, Knob_File_Paths* project_name##_link_files, int argc,char** argv)
 #else
 #define MAIN(project_name) int main(int argc,char** argv)
 #endif
@@ -528,29 +541,6 @@ Knob_String_View knob_sv_from_parts(const char *data, size_t count);
 #include <dirent.h>
 #else // _WIN32
 
-LPSTR GetLastErrorAsString(void)
-{
-    // https://stackoverflow.com/questions/1387064/how-to-get-the-error-message-from-the-error-code-returned-by-getlasterror
-
-    DWORD errorMessageId = GetLastError();
-    assert(errorMessageId != 0);
-
-    LPSTR messageBuffer = NULL;
-
-    DWORD size =
-        FormatMessage(
-            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
-            NULL, // LPCVOID lpSource,
-            errorMessageId, // DWORD   dwMessageId,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
-            (LPSTR) &messageBuffer, // LPTSTR  lpBuffer,
-            0, // DWORD   nSize,
-            NULL // va_list *Arguments
-        );
-
-    return messageBuffer;
-}
-
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 
@@ -613,6 +603,31 @@ int knob_sleep_ms(int milliseconds);
 #endif
 
 #if defined(KNOB_IMPLEMENTATION)
+
+#ifdef _WIN32
+LPSTR GetLastErrorAsString(void)
+{
+    // https://stackoverflow.com/questions/1387064/how-to-get-the-error-message-from-the-error-code-returned-by-getlasterror
+
+    DWORD errorMessageId = GetLastError();
+    assert(errorMessageId != 0);
+
+    LPSTR messageBuffer = NULL;
+
+    DWORD size =
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, // DWORD   dwFlags,
+            NULL, // LPCVOID lpSource,
+            errorMessageId, // DWORD   dwMessageId,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // DWORD   dwLanguageId,
+            (LPSTR) &messageBuffer, // LPTSTR  lpBuffer,
+            0, // DWORD   nSize,
+            NULL // va_list *Arguments
+        );
+
+    return messageBuffer;
+}
+#endif
 
 static size_t knob_temp_size = 0;
 static char knob_temp[KNOB_TEMP_CAPACITY] = {0};
@@ -701,7 +716,9 @@ defer:
 
 void knob_cmd_render(Knob_Cmd cmd, Knob_String_Builder *render)
 {
-    for (size_t i = 0; i < cmd.count; ++i) {
+    memset(render->items,0,render->capacity);
+    size_t i = 0;
+    for (; i < cmd.count; ++i) {
         const char *arg = cmd.items[i];
         if (arg == NULL) break;
         if (i > 0) knob_sb_append_cstr(render, " ");
@@ -713,21 +730,12 @@ void knob_cmd_render(Knob_Cmd cmd, Knob_String_Builder *render)
             knob_da_append(render, '\'');
         }
     }
+    knob_sb_append_null(render);
+    return;
 }
 
 Knob_Proc knob_cmd_run_async(Knob_Cmd cmd, Knob_Fd *fdin, Knob_Fd *fdout)
 {
-        if (cmd.count < 1) {
-            knob_log(KNOB_ERROR, "Could not run empty command");
-            return KNOB_INVALID_PROC;
-        }
-
-    Knob_String_Builder sb = {0};
-    knob_cmd_render(cmd, &sb);
-    knob_sb_append_null(&sb);
-    knob_log(KNOB_INFO, "CMD: %s", sb.items);
-    knob_sb_free(sb);
-    memset(&sb, 0, sizeof(sb));
 #ifdef _WIN32
     // https://docs.microsoft.com/en-us/windows/win32/procthread/creating-a-child-process-with-redirected-input-and-output
 
@@ -736,25 +744,36 @@ Knob_Proc knob_cmd_run_async(Knob_Cmd cmd, Knob_Fd *fdin, Knob_Fd *fdout)
     siStartInfo.cb = sizeof(STARTUPINFO);
     // NOTE: theoretically setting NULL to std handles should not be a problem
     // https://docs.microsoft.com/en-us/windows/console/getstdhandle?redirectedfrom=MSDN#attachdetach-behavior
-    // TODO: check for errors in GetStdHandle
     siStartInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-    siStartInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-    siStartInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    // TODO(#32): check for errors in GetStdHandle
+    siStartInfo.hStdOutput = fdout ? *fdout : GetStdHandle(STD_OUTPUT_HANDLE);
+    siStartInfo.hStdInput = fdin ? *fdin : GetStdHandle(STD_INPUT_HANDLE);
     siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
     PROCESS_INFORMATION piProcInfo;
     ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
 
-    // TODO: use a more reliable rendering of the command instead of cmd_render
-    // cmd_render is for logging primarily
-    knob_cmd_render(cmd, &sb);
-    knob_sb_append_null(&sb);
-    BOOL bSuccess = CreateProcessA(NULL, sb.items, NULL, NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo);
-    knob_sb_free(sb);
+    Knob_String_Builder sb = {0};
+    knob_cmd_render(cmd,&sb);
+    BOOL bSuccess =
+        CreateProcess(
+            NULL,
+            // TODO(#33): cmd_run_async on Windows does not render command line properly
+            // It may require wrapping some arguments with double-quotes if they contains spaces, etc.
+            sb.items,
+            NULL,
+            NULL,
+            TRUE,
+            0,
+            NULL,
+            NULL,
+            &siStartInfo,
+            &piProcInfo
+        );
 
     if (!bSuccess) {
-        knob_log(KNOB_ERROR, "Could not create child process: %lu", GetLastError());
-        return KNOB_INVALID_PROC;
+        knob_log(KNOB_ERROR,"Could not create child process %s: %s\n",
+              sb.items, GetLastErrorAsString());
     }
 
     CloseHandle(piProcInfo.hThread);
@@ -904,7 +923,6 @@ int knob_cstr_ends(char* str,const char* end){
     } 
     return 1;
 }
-
 Knob_Pipe knob_pipe_make(void)
 {
     Knob_Pipe pip = {0};
@@ -1648,7 +1666,7 @@ void knob_config_add_files(Knob_Config* config,const char* filepaths[],size_t le
         }
     }
 }
-int knob_config_build(Knob_Config* config,Knob_File_Paths* outs,int debug){
+int knob_config_build(Knob_Config* config,Knob_File_Paths* outs){
     bool result = true;
     Knob_Cmd cmd = {0};
     Knob_String_Builder sb_cmp = {0};
@@ -1657,7 +1675,7 @@ int knob_config_build(Knob_Config* config,Knob_File_Paths* outs,int debug){
     const char* filepath = NULL;
     const char* config_file = knob_temp_sprintf("%s"PATH_SEP"config.h",config->build_to);
     
-    if(config->compiler_path[0] != '\0'){
+        if(config->compiler_path[0] != '\0'){
         if(knob_path_is_dir(config->compiler_path)){
             knob_sb_append_cstr(&sb_cmp,config->compiler_path);
         }
@@ -1695,17 +1713,12 @@ int knob_config_build(Knob_Config* config,Knob_File_Paths* outs,int debug){
             }
             knob_cmd_append(&cmd, "-c",filepath);
             knob_cmd_append(&cmd,"-o",out);
-            if(debug){
-                Knob_String_Builder render = {0};
-                knob_cmd_render(cmd,&render);
-                knob_log(KNOB_INFO,"CPP CMD: %s",render.items);
-            }
             Knob_Proc proc = knob_cmd_run_async(cmd,NULL,NULL);
             knob_da_append(&procs, proc);
         }
         knob_da_append(outs,out);
     }
-    memset(sb_cmp.items,0,sb_cmp.count);
+        memset(sb_cmp.items,0,sb_cmp.count);
     sb_cmp.count =0;
     if(config->compiler_path[0] != '\0'){
         if(knob_path_is_dir(config->compiler_path)){
@@ -1744,11 +1757,6 @@ int knob_config_build(Knob_Config* config,Knob_File_Paths* outs,int debug){
             }
             knob_cmd_append(&cmd, "-c",filepath);
             knob_cmd_append(&cmd,"-o",out);
-            if(debug){
-                Knob_String_Builder render = {0};
-                knob_cmd_render(cmd,&render);
-                knob_log(KNOB_INFO,"C CMD: %s",render.items);
-            }
             Knob_Proc proc = knob_cmd_run_async(cmd,NULL,NULL);
             knob_da_append(&procs, proc);
         }
@@ -1792,8 +1800,14 @@ void knob_cmd_add_compiler(Knob_Cmd* cmd,Knob_Config* config){
         }
     }
     if(config->compiler == COMPILER_ZIG){
+        if(config->output_type == BIN_DLL){
+            knob_cmd_append(cmd, "-shared","-fPIC");
+        }
         if(config->debug_mode){
             knob_cmd_append(cmd,"--debug");
+        }
+        if(config->target == TARGET_WIN64_MSVC){
+            knob_cmd_append(cmd,"-target","x86_64-windows-msvc");
         }
         knob_cmd_append(cmd,"-std=c11", "-fno-sanitize=undefined","-fno-omit-frame-pointer");
     }
@@ -1806,6 +1820,7 @@ void knob_cmd_add_includes(Knob_Cmd* cmd,Knob_Config* config){
 }
 
 int knob_compile_run_submodule(const char* path,Knob_Config* config,Knob_File_Paths* files_to_link,Knob_Cmd* cmd_to_pass,const char* path_to_knobh){
+    int result = 1;
     Knob_Cmd cmd = {0};
     Knob_Config conf = *config;
     conf.output_type = BIN_DLL;
@@ -1829,7 +1844,7 @@ int knob_compile_run_submodule(const char* path,Knob_Config* config,Knob_File_Pa
 
     char project_name[64] = {0};
     int i = path_len-2;
-    while(path[i] != PATH_SEP[0] ){
+    while(path[i] != PATH_SEP[0]){
         i--;
     }
     i++;
@@ -1845,9 +1860,14 @@ int knob_compile_run_submodule(const char* path,Knob_Config* config,Knob_File_Pa
     knob_cmd_append(&cmd,cFile);
 
     knob_cmd_append(&cmd, "-DKNOB_SUBMODULE");
-    int n = snprintf(temp,260,"%s%s%s%s","./build",sep,project_name,DLL_NAME);
+    int n = snprintf(temp,260,".%s%s%s%s%s",PATH_SEP,"build",PATH_SEP,project_name,DLL_NAME);
     knob_cmd_append(&cmd,"-o",temp);
-    if(!knob_cmd_run_sync(cmd)) return 0;
+    if(!knob_cmd_run_sync(cmd)){
+        Knob_String_Builder sb = {0};
+        knob_cmd_render(cmd,&sb);
+        knob_log(KNOB_ERROR,"Failed compilation of submodule, command was: %s",sb.items);
+        knob_return_defer(0);
+    } 
     knob_sleep_ms(500);
     void* dll_handle = dynlib_load(temp);
     if(dll_handle == NULL) return 0;
@@ -1858,14 +1878,14 @@ int knob_compile_run_submodule(const char* path,Knob_Config* config,Knob_File_Pa
     if(func == NULL){
         exit(1);
     }
-    
     memset(temp,0,n);
     getcwd(temp,260);
-    chdir(path);
-    if(!func(&conf,files_to_link,cmd_to_pass->count,(char**)cmd_to_pass->items)) return 0;
-    chdir(temp);
     
-    return 1;
+    chdir(path);
+    if(!func(&conf,files_to_link,cmd_to_pass->count,(char**)cmd_to_pass->items)) knob_return_defer(0);
+    defer:
+    chdir(temp);
+    return result;
     
 }
 
@@ -1883,14 +1903,20 @@ DIR *opendir(const char *dirpath)
     assert(dirpath);
 
     char buffer[MAX_PATH];
-    snprintf(buffer, MAX_PATH, "%s\\*", dirpath);
+    snprintf(buffer, MAX_PATH, "%s/*", dirpath);
 
     DIR *dir = (DIR*)calloc(1, sizeof(DIR));
-
     dir->hFind = FindFirstFile(buffer, &dir->data);
     if (dir->hFind == INVALID_HANDLE_VALUE) {
         // TODO: opendir should set errno accordingly on FindFirstFile fail
         // https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
+        DWORD dwError = GetLastError();
+        printf("FindFirstFile failed with error code: %lu\n", dwError);
+        if(dwError == ERROR_PATH_NOT_FOUND){
+            char cwd[256] = {0};
+            getcwd(cwd,256);
+            printf("The directory path you provided to FindFirstFile does not lead to a valid directory on the system:\n cwd %s \n path %s \n",cwd,dirpath);
+        }
         errno = ENOSYS;
         goto fail;
     }
@@ -2004,7 +2030,7 @@ void *dynlib_load(const char *dllfile){
             NULL,GetLastError(),0,(LPSTR)&errMsg,0,NULL);
         strcpy(dynlib_last_err,errMsg);
         setbuf(stderr,dynlib_last_err);
-        fprintf(stderr,"Failed loading %s: %s", dllfile, errMsg);
+        fprintf(stderr,"Failed loading %s: %s", dllfile, (LPSTR)errMsg);
         setbuf(stderr,NULL);
         LocalFree(errMsg);
     }

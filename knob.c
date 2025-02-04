@@ -14,14 +14,14 @@ static const char *raylib_modules[] = {
 
 #ifdef _WIN32
 #define LIB_EXT ".lib"
-#define ZIG_PATH ".\\Tools\\windows_x64\\"
+#define ZIG_PATH ".\\Tools\\FoundryTools_windows_x64\\"
 #else
 #define ZIG_PATH "./Tools/linux_x64/"
 #define LIB_EXT ".a"
 #endif
 
-#define RAYLIB_PATH "Libraries/raylib"
-#define RAYLIB_BUILD_PATH "build/raylib"
+#define RAYLIB_PATH "."PATH_SEP"Libraries"PATH_SEP"raylib"
+#define RAYLIB_BUILD_PATH "."PATH_SEP"build"PATH_SEP"raylib"
 bool build_raylib(Knob_File_Paths* end_cmd,Knob_Config* config)
 {
     bool result = true;
@@ -34,9 +34,9 @@ bool build_raylib(Knob_File_Paths* end_cmd,Knob_Config* config)
     Knob_Procs procs = {0};
     char* compiler = knob_temp_sprintf("%s%s",ZIG_PATH,GET_COMPILER_NAME(config->compiler));
     for (size_t i = 0; i < KNOB_ARRAY_LEN(raylib_modules); ++i) {
-        const char *input_path = knob_temp_sprintf(RAYLIB_PATH"/src/%s.c", raylib_modules[i]);
-        const char *output_path = knob_temp_sprintf("%s/%s.o", RAYLIB_BUILD_PATH, raylib_modules[i]);
-        output_path = knob_temp_sprintf("%s/%s.o", RAYLIB_BUILD_PATH, raylib_modules[i]);
+        const char *input_path = knob_temp_sprintf(RAYLIB_PATH PATH_SEP"src"PATH_SEP"%s.c", raylib_modules[i]);
+        const char *output_path = knob_temp_sprintf("%s"PATH_SEP"%s.o", RAYLIB_BUILD_PATH, raylib_modules[i]);
+        output_path = knob_temp_sprintf("%s"PATH_SEP"%s.o", RAYLIB_BUILD_PATH, raylib_modules[i]);
         knob_cmd_append(end_cmd,output_path);
 
         if (knob_needs_rebuild(output_path, &input_path, 1)) {
@@ -73,12 +73,20 @@ defer:
     return result;
 }
 
-#define IMGUI_PATH "Libraries/imgui"
+#define IMGUI_PATH "Libraries"PATH_SEP"imgui"
 bool build_rlImGui(Knob_File_Paths* end_cmd,Knob_Config* config)
 {
     bool result = true;
     Knob_Cmd cmd = {0};
-
+    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries")) {
+        knob_return_defer(false);
+    }
+    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP IMGUI_PATH)) {
+        knob_return_defer(false);
+    }
+    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries/rlImGui")) {
+        knob_return_defer(false);
+    }
     Knob_Config conf = {0};
     knob_config_init(&conf);
     conf.compiler = config->compiler;
@@ -111,7 +119,7 @@ bool build_rlImGui(Knob_File_Paths* end_cmd,Knob_Config* config)
     knob_config_add_define(&conf,"-fPIC");
 
     conf.build_to = RAYLIB_BUILD_PATH;
-    knob_config_build(&conf,&files,0);
+    knob_config_build(&conf,&files);
     for(int i =0; i < files.count; ++i){
         const char* output_path = files.items[i];
         knob_da_append(end_cmd,output_path);
@@ -171,7 +179,7 @@ MAIN(irc_test){
     );
     knob_config_add_includes(&config,files.items,files.count);
     Knob_File_Paths out_files = {0};
-    if(!knob_config_build(&config,&out_files,0))return 1;
+    if(!knob_config_build(&config,&out_files))return 1;
 
     cmd.count = 0;
 
