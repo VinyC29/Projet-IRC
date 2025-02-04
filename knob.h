@@ -62,11 +62,8 @@
 #include <ctype.h>
 
 #ifdef _WIN32
-#    define WIN32_LEAN_AND_MEAN
-#    include <windows.h>
 #    include <direct.h>
-#    include <shellapi.h>
-typedef HANDLE Knob_Fd;
+typedef void* Knob_Fd;
 #if !defined(__MINGW64__) || !defined(__MINGW32__)
 #define DLL_API __declspec(dllexport)
 #define getcwd(buffer,size) _getcwd(buffer,size)
@@ -216,9 +213,9 @@ bool knob_read_entire_file(const char *path, Knob_String_Builder *sb);
 
 // Process handle
 #ifdef _WIN32
-typedef HANDLE Knob_Proc;
+typedef void* Knob_Proc;
 #define KNOB_INVALID_PROC INVALID_HANDLE_VALUE
-LPSTR GetLastErrorAsString(void);
+// LPSTR GetLastErrorAsString(void);
 #else
 typedef int Knob_Proc;
 #define KNOB_INVALID_PROC (-1)
@@ -540,9 +537,7 @@ Knob_String_View knob_sv_from_parts(const char *data, size_t count);
 #ifndef _WIN32
 #include <dirent.h>
 #else // _WIN32
-
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
+#define MAX_PATH 260
 
 struct dirent
 {
@@ -605,6 +600,10 @@ int knob_sleep_ms(int milliseconds);
 #if defined(KNOB_IMPLEMENTATION)
 
 #ifdef _WIN32
+#undef LPSTR
+#    define WIN32_LEAN_AND_MEAN
+#    define VC_EXTRA_LEAN
+#    include <windows.h>
 LPSTR GetLastErrorAsString(void)
 {
     // https://stackoverflow.com/questions/1387064/how-to-get-the-error-message-from-the-error-code-returned-by-getlasterror
@@ -647,7 +646,11 @@ bool knob_mkdir_if_not_exists(const char *path)
         knob_log(KNOB_ERROR, "could not create directory `%s`: %s", path, strerror(errno));
         return false;
     }
-
+    #ifdef _WIN32
+    else{ //If we don't sleep, windows may not have created the directories by the time we do other things... Gotta love windows.
+        knob_sleep_ms(250);
+    }
+    #endif
     knob_log(KNOB_INFO, "created directory `%s`", path);
     return true;
 }
@@ -1790,7 +1793,12 @@ const char default_source[] =
 }
 
 void knob_cmd_add_compiler(Knob_Cmd* cmd,Knob_Config* config){
-    knob_cmd_append(cmd, GET_COMPILER_NAME(config->compiler));
+    Knob_String_Builder sb = {0};
+    if(!knob_cstr_match((char*)config->compiler_path,(char*)"") && knob_file_exists(config->compiler_path)){
+        knob_sb_append_cstr(&sb,config->compiler_path);
+    }
+    knob_sb_append_cstr(&sb,compiler_names[config->compiler][0]);
+    knob_cmd_append(cmd, sb.items,compiler_names[config->compiler][1]);
     if(config->target == TARGET_LINUX || config->target == TARGET_LINUX_MUSL){// @TODO: Should we add Mingw for plugins ?
         if(config->output_type == BIN_DLL){
             knob_cmd_append(cmd, "-shared","-fPIC");

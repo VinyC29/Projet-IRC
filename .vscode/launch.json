@@ -6,9 +6,9 @@
     "configurations": [
       {
         "name": "(game) Launch",
-        "type": "cppdbg",
+        "type": "cppvsdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/Deployment/FlowForge.com",
+        "program": "${workspaceFolder}/Deployment/IrcProject.com",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",

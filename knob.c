@@ -27,10 +27,6 @@ bool build_raylib(Knob_File_Paths* end_cmd,Knob_Config* config)
     bool result = true;
     Knob_Cmd cmd = {0};
 
-    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH)) {
-        knob_return_defer(false);
-    }
-
     Knob_Procs procs = {0};
     char* compiler = knob_temp_sprintf("%s%s",ZIG_PATH,GET_COMPILER_NAME(config->compiler));
     for (size_t i = 0; i < KNOB_ARRAY_LEN(raylib_modules); ++i) {
@@ -78,15 +74,7 @@ bool build_rlImGui(Knob_File_Paths* end_cmd,Knob_Config* config)
 {
     bool result = true;
     Knob_Cmd cmd = {0};
-    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries")) {
-        knob_return_defer(false);
-    }
-    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP IMGUI_PATH)) {
-        knob_return_defer(false);
-    }
-    if (!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries/rlImGui")) {
-        knob_return_defer(false);
-    }
+
     Knob_Config conf = {0};
     knob_config_init(&conf);
     conf.compiler = config->compiler;
@@ -134,6 +122,10 @@ MAIN(irc_test){
     
     if(!knob_mkdir_if_not_exists("build")){ return 1;}
     if(!knob_mkdir_if_not_exists("Deployment")){ return 1;}
+    if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH)) { return 1; }
+    if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries")) { return 1; }
+    if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "imgui")) { return 1; }
+    if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries/rlImGui")) { return 1; }
 
     if(knob_file_exists("Deployment/imgui.ini")){
         knob_file_del("Deployment/imgui.ini");
@@ -198,7 +190,10 @@ MAIN(irc_test){
     }
     knob_cmd_append(&cmd,"-lm");
     knob_cmd_append(&cmd,"-lstdc++");
-
+    if(config.target == TARGET_WIN64_MINGW || config.target == TARGET_WIN64_MSVC){
+        knob_cmd_append(&cmd,"-lgdi32");
+        knob_cmd_append(&cmd,"-lwinmm");
+    }
     Knob_String_Builder render = {0};
     knob_cmd_render(cmd,&render);
     knob_log(KNOB_INFO,"CMD: %s",render.items);

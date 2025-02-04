@@ -19,7 +19,11 @@
         "knob.h": "c",
         "string.h": "c",
         "ui.h": "c",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "winnt.h": "c",
+        "functional": "c",
+        "direct.h": "c",
+        "filesystem": "c"
     },
     "cmake.configureOnOpen": false
 }
