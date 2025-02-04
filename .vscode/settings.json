@@ -23,7 +23,8 @@
         "winnt.h": "c",
         "functional": "c",
         "direct.h": "c",
-        "filesystem": "c"
+        "filesystem": "c",
+        "future": "c"
     },
     "cmake.configureOnOpen": false
 }

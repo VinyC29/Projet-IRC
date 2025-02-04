@@ -118,6 +118,44 @@ defer:
     return result;
 }
 
+int build_tests(Knob_Config config){
+    Knob_Cmd cmd = {0};
+    knob_log(KNOB_INFO,"Building Tests");
+    Knob_File_Paths files = {0};
+    knob_da_mult_append(&files,
+        "src"PATH_SEP"function_to_test.c",
+        "tests"PATH_SEP"example_test.c",
+    );
+    config.build_to = "."PATH_SEP"build"PATH_SEP"tests";
+    if(!knob_mkdir_if_not_exists(config.build_to)){ return 1;}
+    knob_config_add_files(&config,files.items,files.count);
+    files.count = 0;
+    knob_da_mult_append(&files,
+        ".",
+        "./src",
+    );
+    knob_config_add_includes(&config,files.items,files.count);
+    Knob_File_Paths out_files = {0};
+    if(!knob_config_build(&config,&out_files))return 1;
+    cmd.count = 0;
+
+    knob_cmd_add_compiler(&cmd,&config);
+    knob_cmd_add_includes(&cmd,&config);
+    for(int i =0; i < out_files.count;++i){
+        knob_cmd_append(&cmd,out_files.items[i]);
+    }
+
+    knob_cmd_append(&cmd,"-o","./tests/tests.com");
+    for(int i =0; i < config.cpp_flags.count;++i){
+        knob_cmd_append(&cmd,config.cpp_flags.items[i]);
+    }
+    knob_cmd_append(&cmd,"-lm");
+    knob_cmd_append(&cmd,"-lstdc++");
+    Knob_String_Builder render = {0};
+    knob_cmd_render(cmd,&render);
+    knob_log(KNOB_INFO,"CMD: %s",render.items);
+    if(!knob_cmd_run_sync(cmd)) return 0;
+}
 MAIN(irc_test){
     
     if(!knob_mkdir_if_not_exists("build")){ return 1;}
@@ -130,6 +168,11 @@ MAIN(irc_test){
     if(knob_file_exists("Deployment/imgui.ini")){
         knob_file_del("Deployment/imgui.ini");
     }
+    Knob_Cmd cmd = {0};
+    Knob_Config config = {0};
+    knob_config_init(&config);
+    config.compiler = COMPILER_ZIG;
+    config.compiler_path = ZIG_PATH;
 
     const char* program = knob_shift_args(&argc,&argv);
     char* subcommand = NULL;
@@ -144,14 +187,16 @@ MAIN(irc_test){
     if(knob_cstr_match(subcommand,"build")){
 
     }
+    if(knob_cstr_match(subcommand,"tests")){
+        if(!build_tests(config)){return 1;}
+        knob_log(KNOB_INFO,"Running Tests");
+        knob_cmd_append(&cmd,"./tests/tests.com");
+        if(!knob_cmd_run_sync(cmd)) return 1;
+        return 0;
+    }
 
-    Knob_Config config = {0};
-    knob_config_init(&config);
-    config.compiler = COMPILER_ZIG;
-    config.compiler_path = ZIG_PATH;
 
     Knob_File_Paths o_files = {0};
-    Knob_Cmd cmd = {0};
     if(!build_raylib(&o_files,&config))return 1;
     if(!build_rlImGui(&o_files,&config))return 1;
 
