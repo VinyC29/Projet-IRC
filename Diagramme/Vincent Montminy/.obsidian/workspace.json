@@ -1,54 +1,37 @@
 {
   "main": {
-    "id": "8cd5b05c16af56a5",
+    "id": "e444c1702594299d",
     "type": "split",
     "children": [
       {
-        "id": "67f869a78c14b374",
+        "id": "7bb54e26eff0c340",
         "type": "tabs",
         "children": [
           {
-            "id": "66ecf82717f5693d",
+            "id": "2b35f48a20bc65ab",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
-              "state": {
-                "currentVersion": "1.7.7"
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Release Notes 1.7.7"
-            }
-          },
-          {
-            "id": "1a7f460472955dbf",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Diagramme.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Diagramme"
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
   },
   "left": {
-    "id": "82265bbd9425d4f1",
+    "id": "c266ef31a84d2990",
     "type": "split",
     "children": [
       {
-        "id": "17def9d01f324e39",
+        "id": "6be63e906666bf59",
         "type": "tabs",
         "children": [
           {
-            "id": "3b415acac84b0a16",
+            "id": "9ccca507e3e12133",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -60,7 +43,7 @@
             }
           },
           {
-            "id": "7ff0aa626e1096c2",
+            "id": "9f62080eaaae4329",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -77,7 +60,7 @@
             }
           },
           {
-            "id": "850adca441bee464",
+            "id": "48f1dc4d8d039ecd",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -93,20 +76,20 @@
     "width": 300
   },
   "right": {
-    "id": "9146d982969412aa",
+    "id": "f1293dbf37349f05",
     "type": "split",
     "children": [
       {
-        "id": "fac637814d785741",
+        "id": "1aa770964d279b15",
         "type": "tabs",
         "children": [
           {
-            "id": "6e61546d2af634a6",
+            "id": "28da4b589f296147",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Diagramme.md",
+                "file": "Diagramme IRC.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,46 +99,51 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Diagramme"
+              "title": "Backlinks for Diagramme IRC"
             }
           },
           {
-            "id": "8a751e2721dee874",
+            "id": "c1c2a3bec17b07b9",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Diagramme.md",
+                "file": "Diagramme IRC.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Diagramme"
+              "title": "Outgoing links from Diagramme IRC"
             }
           },
           {
-            "id": "e3e64814a5311187",
+            "id": "beb2608d0657add7",
             "type": "leaf",
             "state": {
               "type": "tag",
               "state": {
                 "sortOrder": "frequency",
-                "useHierarchy": true
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-tags",
               "title": "Tags"
             }
           },
           {
-            "id": "0bf9758e960b5c2c",
+            "id": "15cd2a47485170e1",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Diagramme.md"
+                "file": "Diagramme IRC.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Diagramme"
+              "title": "Outline of Diagramme IRC"
             }
           }
         ]
@@ -175,8 +163,15 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "1a7f460472955dbf",
+  "active": "2b35f48a20bc65ab",
   "lastOpenFiles": [
-    "Diagramme.md"
+    "Diagramme.md",
+    "Diagramme/Diagramme.md",
+    "Diagramme/Vincent Montminy",
+    "Diagramme/Nouveau dossier",
+    "Diagramme",
+    "Nouveau dossier",
+    "README.md",
+    "Diagramme IRC.md"
   ]
 }
