@@ -105,6 +105,7 @@ bool build_rlImGui(Knob_File_Paths* end_cmd,Knob_Config* config)
     files.count = 0;
 
     knob_config_add_define(&conf,"-fPIC");
+    knob_config_add_cpp_flag(&conf,"-mcrc32");
 
     conf.build_to = RAYLIB_BUILD_PATH;
     knob_config_build(&conf,&files);
@@ -233,6 +234,7 @@ MAIN(irc_test){
     for(int i =0; i < config.cpp_flags.count;++i){
         knob_cmd_append(&cmd,config.cpp_flags.items[i]);
     }
+    knob_cmd_append(&cmd,"-lws2_32");
     knob_cmd_append(&cmd,"-lm");
     knob_cmd_append(&cmd,"-lstdc++");
     if(config.target == TARGET_WIN64_MINGW || config.target == TARGET_WIN64_MSVC){
