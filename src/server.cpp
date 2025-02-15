@@ -10,54 +10,72 @@
 #define PORT 6697
 
 int main() {
-	// Init WINSOCK
-	WSAData wsaData;
-	WORD DllVersion = MAKEWORD(2, 1);
+    // Init WINSOCK
+    WSAData wsaData;
+    WORD DllVersion = MAKEWORD(2, 1);
 
-	WSAStartup(DllVersion, &wsaData);
+    WSAStartup(DllVersion, &wsaData);
 
-	// Create Socket
+    // Create Socket
     int iFamily = AF_INET;
     int iType = SOCK_STREAM;
     int iProtocol = IPPROTO_TCP;
 
-	SOCKET sock = socket(iFamily, iType, iProtocol);
+    SOCKET serverSock = socket(iFamily, iType, iProtocol);
 
-	// Define server info
-	SOCKADDR_IN sin;
-	ZeroMemory(&sin, sizeof(sin));
-	sin.sin_port = htons(PORT);
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // Define server info
+    SOCKADDR_IN sin;
+    ZeroMemory(&sin, sizeof(sin));
+    sin.sin_port = htons(PORT);
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-	// Connect to server
-	if (connect(sock, (const sockaddr*)&sin, sizeof(sin)) != 0) {
-		ExitProcess(EXIT_FAILURE);
-	}
+    // Bind the socket
+    bind(serverSock, (const sockaddr*)&sin, sizeof(sin));
 
-/* 		TODO: this is currently a client and it is connecting to a server, this is supposed to be a server, 
-		so change this connection to a "waiting for client" thing. Then do the IRC protocol inputs and outputs.		*/
+    // Wait for client sockets
+    listen(serverSock, SOMAXCONN); 
+    printf("Waiting for clients...\n");
 
-	const char szMsg[] = "HEAD / HTTP/1.0\r\n\r\n";
-	if (!send(sock, szMsg, strlen(szMsg), 0)) {
-		ExitProcess(EXIT_FAILURE);
-	}
+    // Accept client
+    SOCKET clientSock;
+    SOCKADDR_IN clientAddr;
+    int clientAddrLength = sizeof(clientAddr);
 
-	char szBuffer[4096];
-	char szTemp[4096];
+    clientSock = accept(serverSock, (sockaddr*)&clientAddr, &clientAddrLength);
 
-	for (int i = 0; i < sizeof(szBuffer); i++) { 
-		szBuffer[i] = '\0'; 
-	}
+    printf("Client connected\n");
 
-	while (recv(sock, szTemp, 4096, 0)) {
-		strcat(szBuffer, szTemp);
-	}
+    char szBuffer[4096];
+    char szResponse[4096];
 
-	printf("%s\n", szBuffer);
+    // Wipe buffer
+    for (int i = 0; i < sizeof(szBuffer); i++) {
+        szBuffer[i] = '\0';
+    }
 
-	closesocket(sock);
-	getchar();
+    // Receive data from the client
+    while (true) {
+        
+		int bytesReceived = recv(clientSock, szResponse, sizeof(szResponse) - 1, 0);
+		if (bytesReceived <= 0) {
+            break; // Connection closed
+        }
 
-	ExitProcess(EXIT_SUCCESS);
+		// Client response
+        szResponse[bytesReceived] = '\0'; // Wipe response
+        strcat(szBuffer, szResponse); // Append to buffer
+
+        printf("Client Response: %s", szResponse);
+
+		// Test server answer
+        char* answerMessage = "TEST WOOHOO!";
+        send(clientSock, answerMessage, strlen(answerMessage), 0);
+    }
+
+    closesocket(clientSock);
+    closesocket(serverSock);
+    WSACleanup();
+
+    ExitProcess(EXIT_SUCCESS);
 }
