@@ -1,91 +1,54 @@
 #include <cstddef>
+#include <WinSock2.h>
 #include <winsock.h>
 #include <WS2tcpip.h>
 #include <stdio.h>
-#define DEFAULT_PORT "27015"
+#include <Windows.h>
+#define DEFAULT_PORT "6667"
 #define DEFAULT_BUFLEN 512
+#define URL "testnet.ergo.chat"
 
-struct addrinfo *result = NULL,
-                *ptr = NULL,
-                hints;
+struct addrinfo *ptr = NULL;
+struct addrinfo hints;
 
-main(){
+int main(){
 
+    WSADATA wsaData;
 
+    int iResult;
+
+    // Initialize Winsock
+    iResult = WSAStartup(MAKEWORD(2,1), &wsaData);
 
     ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
-    if (iResult != 0)
-    {
-        printf("getaddrinfo failed: %d\n", iResult);
-        WSACleanup();
-        return 1;
-    }
+    iResult = getaddrinfo(URL, DEFAULT_PORT, &hints, &ptr);
 
     SOCKET ConnectSocket = INVALID_SOCKET;
-
-    ptr = result;
 
     ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
                            ptr->ai_protocol);
 
-    if (ConnectSocket == INVALID_SOCKET)
-    {
-        printf("Error at socket(): %ld\n", WSAGetLastError());
-        freeaddrinfo(result);
-        WSACleanup();
-        return 1;
-    }
-
     // Connect to server.
     iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
-    if (iResult == SOCKET_ERROR)
-    {
-        closesocket(ConnectSocket);
-        ConnectSocket = INVALID_SOCKET;
-    }
 
-    freeaddrinfo(result);
-
-    if (ConnectSocket == INVALID_SOCKET)
-    {
-        printf("Unable to connect to server!\n");
-        WSACleanup();
-        return 1;
-    }
+    freeaddrinfo(ptr);
 
     int recvbuflen = DEFAULT_BUFLEN;
-
-    const char *sendbuf = "this is a test";
+        
+    char *sendbuf = "this is a test 1";
     char recvbuf[DEFAULT_BUFLEN];
-
-    int iResult;
-
+    
     // Send an initial buffer
-    iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("send failed: %d\n", WSAGetLastError());
-        closesocket(ConnectSocket);
-        WSACleanup();
-        return 1;
-    }
+    iResult = send(ConnectSocket, sendbuf, strlen(sendbuf), 0);
 
     printf("Bytes Sent: %ld\n", iResult);
 
 
     iResult = shutdown(ConnectSocket, SD_SEND);
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("shutdown failed: %d\n", WSAGetLastError());
-        closesocket(ConnectSocket);
-        WSACleanup();
-        return 1;
-    }
     do
     {
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
@@ -99,13 +62,8 @@ main(){
 
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
-    if (iResult == SOCKET_ERROR)
-    {
-        printf("shutdown failed: %d\n", WSAGetLastError());
-        closesocket(ConnectSocket);
-        WSACleanup();
-        return 1;
-    }
+
+    Sleep(10000);
 
     closesocket(ConnectSocket);
     WSACleanup();
