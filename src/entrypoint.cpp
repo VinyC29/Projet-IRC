@@ -3,6 +3,7 @@
 #include "knob.h"
 #include "IRC_Interface.h"
 #include "server/server.h"
+#include "client/client.h"
 
 IRC_Interface* app = NULL;
 
@@ -32,6 +33,6 @@ void raylib_start(void){
     }
 
     app->End();
-    
+
     CloseWindow();
 }
