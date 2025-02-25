@@ -177,11 +177,19 @@ MAIN(irc_test){
 
     const char* program = knob_shift_args(&argc,&argv);
     char* subcommand = NULL;
+    char* appcommand = "";
     if(argc <= 0){
         subcommand = "build";
     } else {
         subcommand = (char*)knob_shift_args(&argc,&argv);
     }
+    
+    if(argc <= 0){
+        appcommand = "server";
+    } else {
+        appcommand = (char*)knob_shift_args(&argc,&argv);
+    }
+
     if(knob_cstr_match(subcommand,"clean")){
         // knob_clean_dir("."PATH_SEP"build");
     }
@@ -215,6 +223,15 @@ MAIN(irc_test){
         "./Libraries/imgui",
         "./Libraries/rlImGui",
     );
+    if(knob_cstr_match(appcommand,"server")){
+
+        knob_da_append(&files,"./src/server");
+        knob_config_add_cpp_flag(&config,"-DSERVER");
+    }
+    else if(knob_cstr_match(appcommand,"client")) {
+        knob_da_append(&files,"./src/client");
+        knob_config_add_cpp_flag(&config,"-DCLIENT");
+    }
     knob_config_add_includes(&config,files.items,files.count);
     Knob_File_Paths out_files = {0};
     if(!knob_config_build(&config,&out_files))return 1;
