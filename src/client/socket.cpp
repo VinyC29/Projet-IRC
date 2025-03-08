@@ -167,6 +167,27 @@ int main()
         printf("Message sent: %s\n", messageChannel);
     }
 
+    std::cout << "stay in the channel and waiting for message..." << std::endl;
+    while (true)
+    {
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
+        if (iResult > 0)
+        {
+            recvbuf[iResult] = '\0';
+            printf("%s", recvbuf);
+        }
+        else if (iResult == 0)
+        {
+            printf("Connection closed\n");
+            break;
+        }
+        else
+        {
+            printf("recv failed: %d\n", WSAGetLastError());
+            break;
+        }
+    }
+
     std::cout << "shutdown connexion" << std::endl;
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
