@@ -58,19 +58,31 @@ int main()
     // Message of the day
     bool motdEnded = false;
 
-    do
+    while (!motdEnded)
     {
-        iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
         if (iResult > 0)
         {
-            printf("Bytes received: %d\n", iResult);
-            printf("Message: %s\n", recvbuf);
+            recvbuf[iResult] = '\0';
+            printf("%s", recvbuf);
+
+            // MOTD ending sequence (part of irc protocol)
+            if (strstr(recvbuf, " 376 ") || strstr(recvbuf, " 422 "))
+            {
+                motdEnded = true;
+            }
         }
         else if (iResult == 0)
+        {
             printf("Connection closed\n");
+            return 1;
+        }
         else
+        {
             printf("recv failed: %d\n", WSAGetLastError());
-    } while (iResult > 0);
+            return 1;
+        }
+    }
 
     std::cout << "joining as user" << std::endl;
     char *joinChannel = "JOIN #chat\r\n";
