@@ -153,6 +153,38 @@ int main()
         }
     }
 
+    std::cout << "see user in channel" << std::endl;
+    char *usersChannel = "NAMES #test\r\n";
+
+    iResult = send(ConnectSocket, usersChannel, strlen(usersChannel), 0);
+
+    bool namesEnd = false;
+
+    printf("Bytes Sent: %ld\n", iResult);
+    while (!namesEnd)
+    {
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
+        if (iResult > 0)
+        {
+            recvbuf[iResult] = '\0';
+            printf("%s", recvbuf);
+            if (strstr(recvbuf, " 366 "))
+            {
+                namesEnd = true;
+            }
+        }
+        else if (iResult == 0)
+        {
+            printf("Connection closed\n");
+            break;
+        }
+        else
+        {
+            printf("recv failed: %d\n", WSAGetLastError());
+            break;
+        }
+    }
+
     std::cout << "send a message to the channel" << std::endl;
     char *messageChannel = "PRIVMSG #test :test message\r\n";
 
