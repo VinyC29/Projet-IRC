@@ -4,21 +4,25 @@
 #include <WS2tcpip.h>
 #include <stdio.h>
 #include <Windows.h>
+#include <iostream>
+#include <string>
+using namespace std;
 #define DEFAULT_PORT "6667"
-#define DEFAULT_BUFLEN 512
+#define DEFAULT_BUFLEN 2048
 #define URL "testnet.ergo.chat"
 
 struct addrinfo *ptr = NULL;
 struct addrinfo hints;
 
-int main(){
+int main()
+{
 
     WSADATA wsaData;
 
     int iResult;
 
     // Initialize Winsock
-    iResult = WSAStartup(MAKEWORD(2,1), &wsaData);
+    iResult = WSAStartup(MAKEWORD(2, 1), &wsaData);
 
     ZeroMemory(&hints, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -38,32 +42,53 @@ int main(){
     freeaddrinfo(ptr);
 
     int recvbuflen = DEFAULT_BUFLEN;
-        
-    char *sendbuf = "this is a test 1";
+
+    char *sendNick = "NICK testtest\r\n";
+    char *sendUser = "USER testtest **: Amy Pond\r\n";
     char recvbuf[DEFAULT_BUFLEN];
-    
+
     // Send an initial buffer
-    iResult = send(ConnectSocket, sendbuf, strlen(sendbuf), 0);
+    iResult = send(ConnectSocket, sendNick, strlen(sendNick), 0);
+    iResult = send(ConnectSocket, sendUser, strlen(sendUser), 0);
 
     printf("Bytes Sent: %ld\n", iResult);
-
-
-    iResult = shutdown(ConnectSocket, SD_SEND);
     do
     {
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
         if (iResult > 0)
+        {
             printf("Bytes received: %d\n", iResult);
+            printf("Message: %s\n", recvbuf);
+        }
         else if (iResult == 0)
             printf("Connection closed\n");
         else
             printf("recv failed: %d\n", WSAGetLastError());
     } while (iResult > 0);
 
+    char *joinChannel = "JOIN #chat\r\n";
+
+    iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
+
+    printf("Bytes Sent: %ld\n", iResult);
+    do
+    {
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
+        if (iResult > 0)
+        {
+            printf("Bytes received: %d\n", iResult);
+            printf("Message: %s\n", recvbuf);
+        }
+        else if (iResult == 0)
+            printf("Connection closed\n");
+        else
+            printf("recv failed: %d\n", WSAGetLastError());
+    } while (iResult > 0);
+
+    printf("hi");
+
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
-
-    Sleep(10000);
 
     closesocket(ConnectSocket);
     WSACleanup();
