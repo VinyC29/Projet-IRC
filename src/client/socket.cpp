@@ -11,6 +11,7 @@ using namespace std;
 #define DEFAULT_BUFLEN 2048
 #define URL "testnet.ergo.chat"
 
+
 struct addrinfo *ptr = NULL;
 struct addrinfo hints;
 
@@ -121,7 +122,7 @@ int main()
     }
 
     std::cout << "joining channel" << std::endl;
-    char *joinChannel = "JOIN #chat\r\n";
+    char *joinChannel = "JOIN #test\r\n";
 
     iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
 
@@ -150,6 +151,20 @@ int main()
             printf("recv failed: %d\n", WSAGetLastError());
             break;
         }
+    }
+
+    std::cout << "send a message to the channel" << std::endl;
+    char *messageChannel = "PRIVMSG #test :test message\r\n";
+
+    iResult = send(ConnectSocket, messageChannel, strlen(messageChannel), 0);
+
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("Send failed: %d\n", WSAGetLastError());
+    }
+    else
+    {
+        printf("Message sent: %s\n", messageChannel);
     }
 
     std::cout << "shutdown connexion" << std::endl;
