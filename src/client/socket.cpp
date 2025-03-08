@@ -175,6 +175,15 @@ int main()
         {
             recvbuf[iResult] = '\0';
             printf("%s", recvbuf);
+
+            if (strstr(recvbuf, "PING"))
+            {
+
+                char *pongMessage = "PONG";
+
+                send(ConnectSocket, pongMessage, strlen(pongMessage), 0);
+                printf("Sent: %s", pongMessage);
+            }
         }
         else if (iResult == 0)
         {
