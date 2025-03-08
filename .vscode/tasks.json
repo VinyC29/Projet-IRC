@@ -27,7 +27,7 @@
             }
         },
         {
-            "label": "Build game",
+            "label": "Build client",
             "type": "shell",
             "windows":{
                 "command": "${workspaceFolder}/knob.exe",
@@ -35,6 +35,20 @@
             "linux":{
                 "command": "${workspaceFolder}/knob",
             },
+            "args": ["build", "client"],
+            "dependsOn": "Build knob",
+        },
+
+        {
+            "label": "Build server",
+            "type": "shell",
+            "windows":{
+                "command": "${workspaceFolder}/knob.exe",
+            },
+            "linux":{
+                "command": "${workspaceFolder}/knob",
+            },
+            "args": ["build", "server"],
             "dependsOn": "Build knob",
         }
     ]

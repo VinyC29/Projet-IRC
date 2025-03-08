@@ -12,7 +12,7 @@
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",
-        "preLaunchTask": "Build game"
+        "preLaunchTask": "Build client"
       },
       {
         "name": "(knob) Launch",

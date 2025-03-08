@@ -1,5 +1,11 @@
+/* --------------------------------------------- */
+/* THIS FILE IS TO BE REFACTORED INTO server.cpp */
+/* --------------------------------------------- */
+
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+
+#include "server.h"
 
 #pragma comment(lib, "ws2_32.lib")
 #include <WinSock2.h>
@@ -7,9 +13,10 @@
 #include <stdlib.h>
 #include <Windows.h>
 
-#define PORT 6697
+#define PORT 6667
+#define ADDRESS "127.0.0.1"
 
-int main() {
+int ServerStart() {
     // Init WINSOCK
     WSAData wsaData;
     WORD DllVersion = MAKEWORD(2, 1);
@@ -28,7 +35,7 @@ int main() {
     ZeroMemory(&sin, sizeof(sin));
     sin.sin_port = htons(PORT);
     sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+    sin.sin_addr.s_addr = inet_addr(ADDRESS);
 
     // Bind the socket
     bind(serverSock, (const sockaddr*)&sin, sizeof(sin));
@@ -48,6 +55,7 @@ int main() {
 
     char szBuffer[4096];
     char szResponse[4096];
+    char* parsedResponse[512];
 
     // Wipe buffer
     for (int i = 0; i < sizeof(szBuffer); i++) {
@@ -66,16 +74,36 @@ int main() {
         szResponse[bytesReceived] = '\0'; // Wipe response
         strcat(szBuffer, szResponse); // Append to buffer
 
-        printf("Client Response: %s", szResponse);
+        //printf(szResponse); // Client response
 
-		// Test server answer
-        char* answerMessage = "TEST WOOHOO!";
+        char* delimiter = "\r\n ";
+        char* token = strtok(szResponse, delimiter); // Parse client response
+        int i = 0;
+
+        while (token != NULL)
+        {
+            parsedResponse[i] = token;
+            printf("%d : %s\n", i, parsedResponse[i]);  // Put the parsed strings in the parsedResponse list with an index.
+            token = strtok(NULL, delimiter);
+            i++;
+        }
+        
+        printf("\n--- Server doing its thing... ---\n");
+
+		// Server answer
+        char answerMessage[1024];
+
+        if (strcmp(parsedResponse[0], "NICK") == 0) {
+            char* nickname = parsedResponse[1];
+            char* username = parsedResponse[3];
+            strcpy(answerMessage, "Hello world!");
+        }
+
+        printf(answerMessage);
         send(clientSock, answerMessage, strlen(answerMessage), 0);
     }
 
     closesocket(clientSock);
     closesocket(serverSock);
     WSACleanup();
-
-    ExitProcess(EXIT_SUCCESS);
 }
