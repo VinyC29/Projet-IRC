@@ -84,25 +84,31 @@ int main()
         }
     }
 
-    std::cout << "joining as user" << std::endl;
+    std::cout << "joining channel" << std::endl;
     char *joinChannel = "JOIN #chat\r\n";
 
     iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
 
     printf("Bytes Sent: %ld\n", iResult);
-    do
+    while (true)
     {
-        iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
         if (iResult > 0)
         {
-            printf("Bytes received: %d\n", iResult);
-            printf("Message: %s\n", recvbuf);
+            recvbuf[iResult] = '\0';
+            printf("%s", recvbuf);
         }
         else if (iResult == 0)
+        {
             printf("Connection closed\n");
+            break;
+        }
         else
+        {
             printf("recv failed: %d\n", WSAGetLastError());
-    } while (iResult > 0);
+            break;
+        }
+    }
 
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
