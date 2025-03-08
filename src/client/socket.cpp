@@ -103,7 +103,7 @@ int main()
             recvbuf[iResult] = '\0';
             printf("%s", recvbuf);
 
-            if (strstr(recvbuf, "End of LIST"))
+            if (strstr(recvbuf, " 323 "))
             {
                 listEnded = true;
             }
@@ -135,7 +135,7 @@ int main()
         {
             recvbuf[iResult] = '\0';
             printf("%s", recvbuf);
-            if (strstr(recvbuf, "End of NAMES list"))
+            if (strstr(recvbuf, " 366 "))
             {
                 joinEnd = true;
             }
