@@ -84,19 +84,29 @@ int main()
         }
     }
 
-    std::cout << "joining channel" << std::endl;
-    char *joinChannel = "JOIN #chat\r\n";
 
-    iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
+    // Ajout car doit avoir passer au moins 15 secondes pour voir la liste des channels
+    Sleep(15000);
+    std::cout << "See channel" << std::endl;
+    char *seeChannel = "LIST\r\n";
+
+    bool listEnded = false;
+
+    iResult = send(ConnectSocket, seeChannel, strlen(seeChannel), 0);
 
     printf("Bytes Sent: %ld\n", iResult);
-    while (true)
+    while (!listEnded)
     {
         iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
         if (iResult > 0)
         {
             recvbuf[iResult] = '\0';
             printf("%s", recvbuf);
+
+            if (strstr(recvbuf, "End of LIST"))
+            {
+                listEnded = true;
+            }
         }
         else if (iResult == 0)
         {
@@ -110,6 +120,39 @@ int main()
         }
     }
 
+    std::cout << "joining channel" << std::endl;
+    char *joinChannel = "JOIN #chat\r\n";
+
+    iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
+
+    bool joinEnd = false;
+
+    printf("Bytes Sent: %ld\n", iResult);
+    while (!joinEnd)
+    {
+        iResult = recv(ConnectSocket, recvbuf, recvbuflen - 1, 0);
+        if (iResult > 0)
+        {
+            recvbuf[iResult] = '\0';
+            printf("%s", recvbuf);
+            if (strstr(recvbuf, "End of NAMES list"))
+            {
+                joinEnd = true;
+            }
+        }
+        else if (iResult == 0)
+        {
+            printf("Connection closed\n");
+            break;
+        }
+        else
+        {
+            printf("recv failed: %d\n", WSAGetLastError());
+            break;
+        }
+    }
+
+    std::cout << "shutdown connexion" << std::endl;
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
 
