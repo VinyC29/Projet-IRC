@@ -41,6 +41,8 @@ int main()
 
     freeaddrinfo(ptr);
 
+    std::cout << "joining as user" << std::endl;
+
     int recvbuflen = DEFAULT_BUFLEN;
 
     char *sendNick = "NICK testtest\r\n";
@@ -50,8 +52,12 @@ int main()
     // Send an initial buffer
     iResult = send(ConnectSocket, sendNick, strlen(sendNick), 0);
     iResult = send(ConnectSocket, sendUser, strlen(sendUser), 0);
-
+    
     printf("Bytes Sent: %ld\n", iResult);
+    
+    // Message of the day
+    bool motdEnded = false;
+
     do
     {
         iResult = recv(ConnectSocket, recvbuf, recvbuflen, 0);
@@ -66,6 +72,7 @@ int main()
             printf("recv failed: %d\n", WSAGetLastError());
     } while (iResult > 0);
 
+    std::cout << "joining as user" << std::endl;
     char *joinChannel = "JOIN #chat\r\n";
 
     iResult = send(ConnectSocket, joinChannel, strlen(joinChannel), 0);
@@ -84,8 +91,6 @@ int main()
         else
             printf("recv failed: %d\n", WSAGetLastError());
     } while (iResult > 0);
-
-    printf("hi");
 
     // shutdown the send half of the connection
     iResult = shutdown(ConnectSocket, SD_SEND);
