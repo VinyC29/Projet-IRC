@@ -20,7 +20,7 @@ void Client::Update() {
 }
 
 void Client::Draw() {
-
+    
 }
 
 void Client::End() {

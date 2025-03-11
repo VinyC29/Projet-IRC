@@ -12,7 +12,8 @@
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",
-        "preLaunchTask": "Build client"
+        "preLaunchTask": "Build client",
+        "console": "externalTerminal"
       },
       {
         "name": "(knob) Launch",
