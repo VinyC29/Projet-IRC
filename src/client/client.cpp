@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
+#include "imgui.h"
 
 #define PORT 6667
 
@@ -20,6 +21,8 @@ void Client::Update() {
 }
 
 void Client::Draw() {
+    // Library/rllmGui/example/simple
+    ImGui::Text("Hello, world %d", 123);
     
 }
 
