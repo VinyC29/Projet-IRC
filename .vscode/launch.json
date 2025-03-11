@@ -12,7 +12,7 @@
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",
-        "preLaunchTask": "Build client"
+        "preLaunchTask": "Build client" // Make sure to delete the build file when switching between build server/client.
       },
       {
         "name": "(knob) Launch",
