@@ -46,7 +46,17 @@ void Client::Draw() {
 		ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
 		
 		ImGui::SetCursorPos(ImVec2(50,170));
-		ImGui::Button("Connexion", ImVec2(75, 50));
+		static int clicked = 0;
+		if(ImGui::Button("Connexion", ImVec2(100, 40)))
+		{
+			clicked++;
+		}		
+		if (clicked & 1)
+        {
+			ImGui::SetCursorPos(ImVec2(50,225));
+            ImGui::Text("Thanks for clicking me!");
+        }
+
 
 		rlImGuiEnd();
 
