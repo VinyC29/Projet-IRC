@@ -19,7 +19,7 @@ void raylib_start(void){
     InitWindow(960,540,"Irc");
     SetTargetFPS(60);
 
-    app->Start("127.0.0.1");
+    app->Start(false, "127.0.0.1");
 
     while(!WindowShouldClose()){
         ClearBackground(background);

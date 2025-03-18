@@ -5,7 +5,7 @@ class Server : public IRC_Interface {
 private:
     
 public:
-    void Start(const char* url) override;
+    void Start(bool secure, const char* url) override;
     void Update() override;
     void Draw() override;
     void End() override;
