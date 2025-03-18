@@ -33,15 +33,19 @@ void Client::Draw() {
 	while (!WindowShouldClose())   
 	{
 		BeginDrawing();
-		ClearBackground(DARKGRAY);
+		ClearBackground(DARKBLUE);
 
 		rlImGuiBegin();
+		
+		ImGui::SetCursorPos(ImVec2(50,100));
 		static char strNick[256];
 		ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
 
+		ImGui::SetCursorPos(ImVec2(50,135));
 		static char strUser[256];
 		ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
-		//ImGui::SetCursorPos(ImVec2(100,100));
+		
+		ImGui::SetCursorPos(ImVec2(50,170));
 		ImGui::Button("Connexion", ImVec2(75, 50));
 
 		rlImGuiEnd();
