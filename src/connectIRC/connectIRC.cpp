@@ -8,23 +8,19 @@
 #include <WinSock2.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <WS2tcpip.h>
 #include <Windows.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 ConnectIRC::ConnectIRC() {
-    WSAData wsaData;
-    WORD DllVersion = MAKEWORD(2, 1);
-
-    WSAStartup(DllVersion, &wsaData);
-    
-    
+    DllVersion = MAKEWORD(2, 1);
+    iResult = WSAStartup(DllVersion, &wsaData);  
 }
 
 SOCKET ConnectIRC::CreateSocket() {
-    
-    WSAData wsaData;
-    WORD DllVersion = MAKEWORD(2, 1);
-
-    WSAStartup(DllVersion, &wsaData);
     
     // Create Socket
     int iFamily = AF_INET;
@@ -35,6 +31,38 @@ SOCKET ConnectIRC::CreateSocket() {
     return sock;
 }
 
-void ConnectIRC::Connect(const bool secure, const char* address) {
+void ConnectIRC::Connect(const bool secure, const char* address, const bool isServer) {
+
+    int port = 6667;
+    if (secure) { port = 6697; }
     
+    if (isServer) {
+
+        SOCKET serverSocket = CreateSocket();
+        SOCKADDR_IN sin;
+        ZeroMemory(&sin, sizeof(sin));
+        sin.sin_port = htons(port);
+        sin.sin_family = AF_INET;
+        sin.sin_addr.s_addr = inet_addr(address);
+
+        bind(serverSocket, (const sockaddr*)&sin, sizeof(sin));
+    
+    } else {
+
+        struct addrinfo *ptr = NULL;
+        struct addrinfo hints;
+
+        ZeroMemory(&hints, sizeof(hints));
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+    
+        iResult = getaddrinfo(address, (PCSTR)port, &hints, &ptr);
+        SOCKET ClientSocket = CreateSocket();
+        
+        iResult = connect(ClientSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+
+        freeaddrinfo(ptr);
+
+    }
 }

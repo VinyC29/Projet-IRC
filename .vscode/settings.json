@@ -73,7 +73,8 @@
         "xloctime": "cpp",
         "xmemory": "cpp",
         "xstring": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "valarray": "cpp"
     },
     "cmake.configureOnOpen": false
 }
