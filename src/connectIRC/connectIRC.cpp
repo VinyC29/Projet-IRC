@@ -15,9 +15,9 @@
 
 using namespace std;
 
-ConnectIRC::ConnectIRC() {
+ConnectIRC::ConnectIRC() noexcept {
     DllVersion = MAKEWORD(2, 1);
-    iResult = WSAStartup(DllVersion, &wsaData);  
+    WSAStartup(DllVersion, &wsaData);  
 }
 
 SOCKET ConnectIRC::CreateSocket() {
@@ -40,6 +40,7 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
 
         SOCKET serverSocket = CreateSocket();
         SOCKADDR_IN sin;
+
         ZeroMemory(&sin, sizeof(sin));
         sin.sin_port = htons(port);
         sin.sin_family = AF_INET;
@@ -49,6 +50,7 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
     
     } else {
 
+        SOCKET ClientSocket = CreateSocket();
         struct addrinfo *ptr = NULL;
         struct addrinfo hints;
 
@@ -56,13 +58,16 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
-    
-        iResult = getaddrinfo(address, (PCSTR)port, &hints, &ptr);
-        SOCKET ClientSocket = CreateSocket();
         
-        iResult = connect(ClientSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+        getaddrinfo(address, (PCSTR)port, &hints, &ptr);
+        
+        connect(ClientSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
         freeaddrinfo(ptr);
 
     }
+}
+
+void ConnectIRC::ReceiveMessage(Knob_String_Builder* StringBuilder) {
+
 }

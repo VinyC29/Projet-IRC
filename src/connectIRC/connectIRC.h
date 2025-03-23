@@ -1,5 +1,7 @@
 #pragma once
 
+#include "knob.h"
+
 #include <WinSock2.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +12,9 @@ class ConnectIRC {
 private:
     WSAData wsaData;
     WORD DllVersion;
-    static int iResult;  
     static SOCKET CreateSocket();
+    ConnectIRC() noexcept;
 public:
     static void Connect(const bool secure, const char* address, const bool isServer);
+    static void ReceiveMessage(Knob_String_Builder* StringBuilder);
 };

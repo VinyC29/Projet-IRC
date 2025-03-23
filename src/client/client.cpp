@@ -11,7 +11,7 @@
 
 #define PORT 6667
 
-void Client::Start(const char* url) {
+void Client::Start(bool secure, const char* url) {
     
 }
 
