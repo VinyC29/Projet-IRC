@@ -69,5 +69,19 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
 }
 
 void ConnectIRC::ReceiveMessage(Knob_String_Builder* StringBuilder) {
+    Knob_String_Builder testSB;
 
+    testSB.capacity = 16;
+    testSB.count = 0;
+    testSB.items = (char*)malloc(testSB.capacity * sizeof(char));
+    testSB.items[0] = '\0';
+
+    const char *buffer1 = "Hello, ";
+    const char *buffer2 = "world!";
+
+    // I wasn't able to fix the problem here, will be fixed later :(
+    knob_sb_append_buf(&testSB, buffer1, strlen(buffer1)); // ! a value of type "void *" cannot be assigned to an entity of type "char *" !
+    knob_sb_append_buf(&testSB, buffer2, strlen(buffer2)); // ! a value of type "void *" cannot be assigned to an entity of type "char *" !
+
+    printf(testSB.items);
 }
