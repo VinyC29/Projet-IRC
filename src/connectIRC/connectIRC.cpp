@@ -85,3 +85,11 @@ void ConnectIRC::ReceiveMessage(Knob_String_Builder* StringBuilder) {
 
     printf(testSB.items);
 }
+
+void ConnectIRC::SendMessage(Knob_String_Builder* StringBuilder) {
+
+}
+
+void ConnectIRC::Shutdown() {
+    WSACleanup();
+}

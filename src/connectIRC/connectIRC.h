@@ -17,4 +17,6 @@ private:
 public:
     static void Connect(const bool secure, const char* address, const bool isServer);
     static void ReceiveMessage(Knob_String_Builder* StringBuilder);
+    static void SendMessage(Knob_String_Builder* StringBuilder);
+    static void Shutdown();
 };
