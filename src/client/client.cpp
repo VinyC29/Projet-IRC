@@ -9,9 +9,10 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "client.h"
+#include <cstring>
 
 #define PORT 6667
-int Connexion = 0;
+    int Connexion = 0;
 
 void Client::Start(const char* url) {
     int screenWidth = 1280;
@@ -49,10 +50,27 @@ void Client::Draw() {
             ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
 
             ImGui::SetCursorPos(ImVec2(50, 170));
+            static int clicked = 0;
+
             if (ImGui::Button("Connexion", ImVec2(100, 40)))
+                clicked++;
+
+            if (clicked & 1)
             {
-                Connexion = 1;
-               
+                bool invalidUsername = false;
+                bool invalidNickname = false;
+
+                if (strlen(strNick) == 0 || strspn(strNick, " \t\n\r\f\v") == strlen(strNick))
+                {
+                    invalidNickname == true;
+                }
+
+                if (strlen(strUser) == 0 || strspn(strUser, " \t\n\r\f\v") == strlen(strUser))
+                {
+
+                    invalidUsername = true;
+                }
+
             }
            
         }
