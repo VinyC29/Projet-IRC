@@ -15,7 +15,7 @@
 
 using namespace std;
 
-ConnectIRC::ConnectIRC() noexcept {
+ConnectIRC::ConnectIRC() {
     DllVersion = MAKEWORD(2, 1);
     WSAStartup(DllVersion, &wsaData);  
 }
@@ -31,14 +31,13 @@ SOCKET ConnectIRC::CreateSocket() {
     return sock;
 }
 
-void ConnectIRC::Connect(const bool secure, const char* address, const bool isServer) {
+void ConnectIRC::Connect(SOCKET* connectingSocket, const bool secure, const char* address, const bool isServer) {
 
     int port = 6667;
     if (secure) { port = 6697; }
     
     if (isServer) {
 
-        SOCKET serverSocket = CreateSocket();
         SOCKADDR_IN sin;
 
         ZeroMemory(&sin, sizeof(sin));
@@ -46,11 +45,10 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
         sin.sin_family = AF_INET;
         sin.sin_addr.s_addr = inet_addr(address);
 
-        bind(serverSocket, (const sockaddr*)&sin, sizeof(sin));
+        bind(*connectingSocket, (const sockaddr*)&sin, sizeof(sin));
     
     } else {
 
-        SOCKET ClientSocket = CreateSocket();
         struct addrinfo *ptr = NULL;
         struct addrinfo hints;
 
@@ -61,33 +59,47 @@ void ConnectIRC::Connect(const bool secure, const char* address, const bool isSe
         
         getaddrinfo(address, (PCSTR)port, &hints, &ptr);
         
-        connect(ClientSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+        connect(*connectingSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
         freeaddrinfo(ptr);
 
     }
 }
 
-void ConnectIRC::ReceiveMessage(Knob_String_Builder* StringBuilder) {
-    Knob_String_Builder testSB;
+char** ConnectIRC::ReceiveMessage(SOCKET* receivingSocket, char* delimiter) {
 
-    testSB.capacity = 16;
-    testSB.count = 0;
-    testSB.items = (char*)malloc(testSB.capacity * sizeof(char));
-    testSB.items[0] = '\0';
+    char szBuffer[2048];
+    char szResponse[2048];
+    char* parsedResponse[1024];
 
-    const char *buffer1 = "Hello, ";
-    const char *buffer2 = "world!";
+    for (int i = 0; i < sizeof(szBuffer); i++) {
+        szBuffer[i] = '\0';
+    }
 
-    // I wasn't able to fix the problem here, will be fixed later :(
-    knob_sb_append_buf(&testSB, buffer1, strlen(buffer1)); // ! a value of type "void *" cannot be assigned to an entity of type "char *" !
-    knob_sb_append_buf(&testSB, buffer2, strlen(buffer2)); // ! a value of type "void *" cannot be assigned to an entity of type "char *" !
+    int bytesReceived = recv(*receivingSocket, szResponse, sizeof(szResponse) - 1, 0);
 
-    printf(testSB.items);
+    if (bytesReceived <= 0) { return; } // Connection was closed
+
+    szResponse[bytesReceived] = '\0'; // Wipe response
+    strcat(szBuffer, szResponse); // Append to buffer
+
+    char* token = strtok(szResponse, delimiter); // Parse response
+    int i = 0;
+
+    while (token != NULL)
+    {
+        parsedResponse[i] = token;
+        printf("%d : %s\n", i, parsedResponse[i]);  // Put the parsed strings in the parsedResponse array with an index.
+        token = strtok(NULL, delimiter);
+        i++;
+    }
+
+    return parsedResponse;
+
 }
-
+    
 void ConnectIRC::SendMessage(Knob_String_Builder* StringBuilder) {
-
+    
 }
 
 void ConnectIRC::Shutdown() {
