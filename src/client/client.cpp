@@ -11,6 +11,7 @@
 #include "client.h"
 
 #define PORT 6667
+int Connexion = 0;
 
 void Client::Start(const char* url) {
     int screenWidth = 1280;
@@ -36,33 +37,30 @@ void Client::Draw() {
 		ClearBackground(DARKBLUE);
 
 		rlImGuiBegin();
-		
-		ImGui::SetCursorPos(ImVec2(50,100));
-		static char strNick[256];
-		ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
 
-		ImGui::SetCursorPos(ImVec2(50,135));
-		static char strUser[256];
-		ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
-		
-		bool test;
-		ImGui::SetCursorPos(ImVec2(50,170));
-		static int clicked = 0;
-		if(ImGui::Button("Connexion", ImVec2(100, 40)))
-		{
-			clicked ++;
-			test = false;
-		}		
-		if (clicked)
+        if (Connexion == 0)
         {
-			ImGui::SetCursorPos(ImVec2(50,225));
-			if(test){
-				ImGui::Text("Thanks for clicking me!");
-			}
-			else{
-				ImGui::Text("No thanks for clicking me!");
-			}
+            ImGui::SetCursorPos(ImVec2(50, 100));
+            static char strNick[256];
+            ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
+
+            ImGui::SetCursorPos(ImVec2(50, 135));
+            static char strUser[256];
+            ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
+
+            ImGui::SetCursorPos(ImVec2(50, 170));
+            if (ImGui::Button("Connexion", ImVec2(100, 40)))
+            {
+                Connexion = 1;
+               
+            }
+           
         }
+        
+        if(Connexion == 1){
+            // TODO : Interface Visuelle serveur
+        }
+		
 
 
 		rlImGuiEnd();
