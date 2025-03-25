@@ -2,4 +2,4 @@
 #include <cstring>
 #include <string>
 
-static bool IsNullOrEmpty(char[] stringToCheck);
+static bool IsStringNullOrEmpty(char* stringToCheck);

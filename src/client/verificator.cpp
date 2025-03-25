@@ -1,11 +1,11 @@
 #pragma once
+#include "verificator.h"
 #include <cstring>
 #include <string>
 
-static bool IsNullOrEmpty(char[] stringToCheck){
-    std::string stringCheck = stringToCheck;
+static bool IsStringNullOrEmpty(char* stringToCheck){
 
-    if (strlen(stringCheck) == 0 || strspn(stringCheck, " \t\n\r\f\v") == strlen(stringCheck))
+    if (strlen(stringToCheck) == 0 || strspn(stringToCheck, " \t\n\r\f\v") == strlen(stringToCheck))
     {
         return true;
     }
