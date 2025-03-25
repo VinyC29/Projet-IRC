@@ -52,23 +52,11 @@ void Client::Draw() {
 
         if (clicked & 1)
         {
-            bool invalidUsername = false;
-            bool invalidNickname = false;
+            bool invalidUsername = IsStringNullOrEmpty(strUser);
+            bool invalidNickname = IsStringNullOrEmpty(strNick);
             bool showErrorMessage = false;
 
             static  std::string errorMessage;
-
-            static std::string test;
-
-            if (strlen(strNick) == 0 || strspn(strNick, " \t\n\r\f\v") == strlen(strNick))
-            {
-                invalidNickname = true;
-            }
-
-            if (strlen(strUser) == 0 || strspn(strUser, " \t\n\r\f\v") == strlen(strUser))
-            {
-                invalidUsername = true;
-            }
 
             if (invalidUsername && invalidNickname)
             {
@@ -96,7 +84,7 @@ void Client::Draw() {
             
             // Test connexion serveur
 
-            Connexion = 1;
+            //Connexion = 1;
         }
     
     
