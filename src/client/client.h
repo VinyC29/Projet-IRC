@@ -1,5 +1,5 @@
 #pragma once
-#include "IRC_Interface.h";
+#include "IRC_Interface.h"
 
 class Client : public IRC_Interface {
 private:
