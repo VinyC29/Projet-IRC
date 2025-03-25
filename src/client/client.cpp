@@ -10,6 +10,7 @@
 #include "raymath.h"
 #include "client.h"
 #include <cstring>
+#include <string>
 
 #define PORT 6667
     int Connexion = 0;
@@ -59,18 +60,47 @@ void Client::Draw() {
             {
                 bool invalidUsername = false;
                 bool invalidNickname = false;
+                bool showErrorMessage = false;
 
-                if (strlen(strNick) == 0 || strspn(strNick, " \t\n\r\f\v") == strlen(strNick))
+                static  std::string errorMessage;
+
+                    if (strlen(strNick) == 0 || strspn(strNick, " \t\n\r\f\v") == strlen(strNick))
                 {
-                    invalidNickname == true;
+                    invalidNickname = true;
                 }
 
                 if (strlen(strUser) == 0 || strspn(strUser, " \t\n\r\f\v") == strlen(strUser))
                 {
-
                     invalidUsername = true;
                 }
 
+                if (invalidUsername && invalidNickname)
+                {
+                    errorMessage = "Invalid Username and Nickname.";
+                    showErrorMessage = true;
+                }
+                else if (invalidNickname)
+                {
+                    errorMessage = ("Invalid Nickname.");
+                    showErrorMessage = true;
+                }
+                else if (invalidUsername)
+                {
+                    errorMessage = ("Invalid Username.");
+                    showErrorMessage = true;
+                }
+
+                if(showErrorMessage){
+                    ImGui::Text(errorMessage.c_str());
+                }
+                else{
+                    ImGui::Text("Connexion");
+                }
+
+                
+                // Test connexion serveur
+
+                //Connexion = 1;
             }
            
         }
