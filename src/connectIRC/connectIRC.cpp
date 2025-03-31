@@ -78,7 +78,7 @@ char** ConnectIRC::ReceiveMessage(SOCKET* receivingSocket, char* delimiter) {
 
     int bytesReceived = recv(*receivingSocket, szResponse, sizeof(szResponse) - 1, 0);
 
-    if (bytesReceived <= 0) { return; } // Connection was closed
+    if (bytesReceived <= 0) { return nullptr; } // Connection was closed or did not receive anything
 
     szResponse[bytesReceived] = '\0'; // Wipe response
     strcat(szBuffer, szResponse); // Append to buffer
@@ -98,8 +98,8 @@ char** ConnectIRC::ReceiveMessage(SOCKET* receivingSocket, char* delimiter) {
 
 }
     
-void ConnectIRC::SendMessage(Knob_String_Builder* StringBuilder) {
-    
+void ConnectIRC::SendMessage(SOCKET* sendingSocket, const char* message) {
+    send(*sendingSocket, message, strlen(message), 0);
 }
 
 void ConnectIRC::Shutdown() {

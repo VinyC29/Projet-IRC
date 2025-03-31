@@ -17,6 +17,6 @@ public:
     static SOCKET CreateSocket();
     static void Connect(SOCKET* connectingSocket, const bool secure, const char* address, const bool isServer);
     static char** ReceiveMessage(SOCKET* receivingSocket, char* delimiter = nullptr);
-    static void SendMessage(Knob_String_Builder* StringBuilder);
+    static void SendMessage(SOCKET* sendingSocket, const char* message);
     static void Shutdown();
 };
