@@ -3,8 +3,10 @@
 
 class Client : public IRC_Interface {
 private:
-    
+    float m_Width;
+    float m_Height;
 public:
+    Client(float width,float height);
     void Start(const char* url) override;
     void Update() override;
     void Draw() override;

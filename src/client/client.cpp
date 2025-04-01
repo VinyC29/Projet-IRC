@@ -12,10 +12,19 @@
 #include "client.h"
 #include <cstring>
 #include <string>
-
 #define PORT 6667
-int Connexion = 0;
 
+enum ClientState
+{
+    CONNEXION,
+    CONNECTED_TO_SERVER
+};
+
+ClientState connexionstate = CONNEXION;
+
+Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
+
+}
 void Client::Start(const char* url) {
 
 	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
@@ -33,8 +42,9 @@ void Client::Draw() {
 
 
     rlImGuiBegin();
-
-    if (Connexion == 0)
+    ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
+    ImGui::SetWindowPos(ImVec2(0,0));
+    if (connexionstate == CONNEXION)
     {
         ImGui::SetCursorPos(ImVec2(50, 100));
         static char strNick[256];
@@ -43,20 +53,26 @@ void Client::Draw() {
         ImGui::SetCursorPos(ImVec2(50, 135));
         static char strUser[256];
         ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
-
+        
         ImGui::SetCursorPos(ImVec2(50, 170));
         static int clicked = 0;
-
-        if (ImGui::Button("Connexion", ImVec2(100, 40)))
+        static bool showErrorMessage = false;
+        static  std::string errorMessage = "";
+        
+        if (ImGui::Button("isConnected", ImVec2(100, 40))){
             clicked++;
+        }
+        
+        if(showErrorMessage){
+            
+            ImGui::Text("%s" ,errorMessage.c_str());
+        }
 
-        if (clicked & 1)
+        if (clicked)
         {
             bool invalidUsername = IsStringNullOrEmpty(strUser);
             bool invalidNickname = IsStringNullOrEmpty(strNick);
-            bool showErrorMessage = false;
 
-            static  std::string errorMessage;
 
             if (invalidUsername && invalidNickname)
             {
@@ -73,32 +89,23 @@ void Client::Draw() {
                 errorMessage = ("Invalid Username.");
                 showErrorMessage = true;
             }
-
-            if(showErrorMessage){
-                ImGui::Text("%s" ,errorMessage.c_str());
-            }
             else{
-                ImGui::Text("Connexion");
+                connexionstate = CONNECTED_TO_SERVER;
             }
 
-            
-            // Test connexion serveur
-
-            //Connexion = 1;
+            clicked = 0;
         }
-    
-    
-    
-        if(Connexion == 1){
-            // TODO : Interface Visuelle serveur
-        }
-        
-
-
-        rlImGuiEnd();
-
-    
 	}    
+    else if(connexionstate == CONNECTED_TO_SERVER){
+        ImGui::SetCursorPos(ImVec2(50, 100));
+        static char strNick[256];
+        ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
+
+        ImGui::SetCursorPos(ImVec2(50, 135));
+        static char strUser[256];
+        ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
+    }
+    rlImGuiEnd();
 
 }
 

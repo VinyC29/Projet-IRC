@@ -166,9 +166,9 @@ MAIN(irc_test){
     if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "imgui")) { return 1; }
     if(!knob_mkdir_if_not_exists(RAYLIB_BUILD_PATH PATH_SEP "Libraries/rlImGui")) { return 1; }
 
-    if(knob_file_exists("Deployment/imgui.ini")){
-        knob_file_del("Deployment/imgui.ini");
-    }
+    //if(knob_file_exists("Deployment/imgui.ini")){
+    //    knob_file_del("Deployment/imgui.ini");
+    //}
     Knob_Cmd cmd = {0};
     Knob_Config config = {0};
     knob_config_init(&config);
