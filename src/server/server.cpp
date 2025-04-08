@@ -29,6 +29,19 @@ void Server::Start(bool secureBoolean, const char* url) {
 
 void Server::Update() {
 
+    char** parsedResponse;
+    parsedResponse = ConnectIRC::ReceiveMessage(&clientSocket, "\r\n ");
+
+    if (parsedResponse != nullptr) {
+        for (int i = 0; parsedResponse[i] != nullptr; i++) {
+
+            printf("%d | %s\n", i, parsedResponse[i]);
+            
+        }
+    } else {
+        printf("No message received\n");
+    }
+
 }
 
 void Server::Draw() {
