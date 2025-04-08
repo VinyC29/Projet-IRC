@@ -15,7 +15,7 @@ using namespace std;
 struct addrinfo *ptr = NULL;
 struct addrinfo hints;
 
-int main()
+int oldclient()
 {
 
     WSADATA wsaData;
@@ -39,14 +39,22 @@ int main()
 
     // Connect to server.
     iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+    
 
-    freeaddrinfo(ptr);
-
+    if(ptr != NULL){
+        freeaddrinfo(ptr);
+    }
+    
     std::cout << "joining as user" << std::endl;
 
     int recvbuflen = DEFAULT_BUFLEN;
 
-    char *sendNick = "NICK testtest\r\n";
+    char temp[256] = {0};
+    int number = 420;
+
+    snprintf(temp, 256, "NICK %s%d\r\n", "test", number);
+
+    char *sendNick = temp;
     char *sendUser = "USER testtest **: Amy Pond\r\n";
     char recvbuf[DEFAULT_BUFLEN];
 
