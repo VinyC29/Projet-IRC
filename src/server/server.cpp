@@ -15,6 +15,16 @@ void Server::Start(bool secureBoolean, const char* url) {
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
 
+    listen(serverSocket, SOMAXCONN); 
+    printf("Waiting for clients...\n");
+
+    SOCKADDR_IN clientAddr;
+    int clientAddrLength = sizeof(clientAddr);
+
+    clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientAddrLength);
+
+    printf("Client connected\n");
+
 }
 
 void Server::Update() {
