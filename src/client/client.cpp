@@ -22,7 +22,8 @@ enum ClientState
 };
 
 ClientState connexionstate = AWAITING_CONNEXION;
-
+bool test = true;
+static  std::string connexionMessage = "";
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
 
 }
@@ -38,6 +39,11 @@ void Client::Update() {
     
     if(connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION){
         printf("hi");
+        // Avec la repoonse du serveur si le nick ou le user est deja utiliser
+        // connexionMessage = "Nick already in use";
+
+        // Avec la repoonse du serveur si la connexion a echouer
+        connexionMessage = "Connexion failed";
     }
 }
 
@@ -61,7 +67,7 @@ void Client::Draw() {
         ImGui::SetCursorPos(ImVec2(50, 170));
         static int clicked = 0;
         static bool showConnexionMessage = false;
-        static  std::string connexionMessage = "";
+
         
         if (ImGui::Button("Connexion", ImVec2(100, 40))){
             clicked++;
