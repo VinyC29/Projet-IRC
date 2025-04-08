@@ -43,12 +43,12 @@ void Client::Update() {
 
 void Client::Draw() {
     // Library/rllmGui/example/simple
-
+    // https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
 
     rlImGuiBegin();
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0,0));
-    if (connexionstate == AWAITING_CONNEXION)
+    if (connexionstate == AWAITING_CONNEXION || connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION)
     {
         ImGui::SetCursorPos(ImVec2(50, 100));
         static char strNick[256];
@@ -63,7 +63,7 @@ void Client::Draw() {
         static bool showConnexionMessage = false;
         static  std::string connexionMessage = "";
         
-        if (ImGui::Button("isConnected", ImVec2(100, 40))){
+        if (ImGui::Button("Connexion", ImVec2(100, 40))){
             clicked++;
         }
         
