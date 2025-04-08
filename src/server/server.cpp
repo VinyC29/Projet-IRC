@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <Windows.h>
 
-#define PORT 6667
+void Server::Start(bool secureBoolean, const char* url) {
 
-void Server::Start(bool secure, const char* url) {
-    
+    serverSocket = ConnectIRC::CreateSocket();
+    ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
+
 }
 
 void Server::Update() {
@@ -25,5 +26,5 @@ void Server::Draw() {
 }
 
 void Server::End() {
-
+    
 }
