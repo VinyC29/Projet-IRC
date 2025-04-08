@@ -36,5 +36,5 @@ void Server::Draw() {
 }
 
 void Server::End() {
-    
+    ConnectIRC::Shutdown();
 }
