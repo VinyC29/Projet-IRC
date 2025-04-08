@@ -16,11 +16,12 @@
 
 enum ClientState
 {
-    CONNEXION,
+    AWAITING_CONNEXION,
+    AWAIT_SERVER_ANSWER_TO_CONNEXION,
     CONNECTED_TO_SERVER
 };
 
-ClientState connexionstate = CONNEXION;
+ClientState connexionstate = AWAITING_CONNEXION;
 
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
 
@@ -34,7 +35,10 @@ void Client::Start(const char* url) {
 }
 
 void Client::Update() {
-
+    
+    if(connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION){
+        printf("hi");
+    }
 }
 
 void Client::Draw() {
@@ -44,7 +48,7 @@ void Client::Draw() {
     rlImGuiBegin();
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0,0));
-    if (connexionstate == CONNEXION)
+    if (connexionstate == AWAITING_CONNEXION)
     {
         ImGui::SetCursorPos(ImVec2(50, 100));
         static char strNick[256];
@@ -56,17 +60,18 @@ void Client::Draw() {
         
         ImGui::SetCursorPos(ImVec2(50, 170));
         static int clicked = 0;
-        static bool showErrorMessage = false;
-        static  std::string errorMessage = "";
+        static bool showConnexionMessage = false;
+        static  std::string connexionMessage = "";
         
         if (ImGui::Button("isConnected", ImVec2(100, 40))){
             clicked++;
         }
         
-        if(showErrorMessage){
+        if(showConnexionMessage){
             
-            ImGui::Text("%s" ,errorMessage.c_str());
+            ImGui::Text("%s" ,connexionMessage.c_str());
         }
+        
 
         if (clicked)
         {
@@ -76,21 +81,23 @@ void Client::Draw() {
 
             if (invalidUsername && invalidNickname)
             {
-                errorMessage = "Invalid Username and Nickname.";
-                showErrorMessage = true;
+                connexionMessage = "Invalid Username and Nickname.";
+                showConnexionMessage = true;
             }
             else if (invalidNickname)
             {
-                errorMessage = ("Invalid Nickname.");
-                showErrorMessage = true;
+                connexionMessage = ("Invalid Nickname.");
+                showConnexionMessage = true;
             }
             else if (invalidUsername)
             {
-                errorMessage = ("Invalid Username.");
-                showErrorMessage = true;
+                connexionMessage = ("Invalid Username.");
+                showConnexionMessage = true;
             }
             else{
-                connexionstate = CONNECTED_TO_SERVER;
+                connexionstate = AWAIT_SERVER_ANSWER_TO_CONNEXION;
+                connexionMessage = ("Awaiting for server answer.");
+                showConnexionMessage = true;
             }
 
             clicked = 0;
