@@ -12,22 +12,24 @@
 using namespace std;
 
 ConnectIRC::ConnectIRC() {
+    static WSAData data = {0};
+    wsaData = &data;
     DllVersion = MAKEWORD(2, 1);
-    WSAStartup(DllVersion, &wsaData);  
+    WSAStartup(DllVersion, wsaData);  
 }
 
-SOCKET ConnectIRC::CreateSocket() {
+pirc_socket ConnectIRC::CreateSocket() {
     
     // Create Socket
     int iFamily = AF_INET;
     int iType = SOCK_STREAM;
     int iProtocol = IPPROTO_TCP;
 
-    SOCKET sock = socket(iFamily, iType, iProtocol);
+    pirc_socket sock = socket(iFamily, iType, iProtocol);
     return sock;
 }
 
-void ConnectIRC::Connect(SOCKET* connectingSocket, const bool secure, const char* address, const bool isServer) {
+void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const char* address, const bool isServer) {
 
     int port = 6667;
     if (secure) { port = 6697; }
@@ -62,7 +64,7 @@ void ConnectIRC::Connect(SOCKET* connectingSocket, const bool secure, const char
     }
 }
 
-char** ConnectIRC::ReceiveMsg(SOCKET* receivingSocket, char* delimiter) {
+char** ConnectIRC::ReceiveMsg(pirc_socket* receivingSocket, char* delimiter) {
 
     char szBuffer[2048];
     char szResponse[2048];
@@ -95,7 +97,7 @@ char** ConnectIRC::ReceiveMsg(SOCKET* receivingSocket, char* delimiter) {
 
 }
     
-void ConnectIRC::SendMsg(SOCKET* sendingSocket, const char* message) {
+void ConnectIRC::SendMsg(pirc_socket* sendingSocket, const char* message) {
     send(*sendingSocket, message, strlen(message), 0);
 }
 

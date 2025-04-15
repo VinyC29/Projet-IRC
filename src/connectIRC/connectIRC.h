@@ -1,16 +1,17 @@
 #pragma once
 
-#include <WinSock2.h>
+struct WSAData;
+typedef unsigned long long pirc_socket;
 
 class ConnectIRC {
 private:
-    WSAData wsaData;
-    WORD DllVersion;
+    WSAData* wsaData;
+    unsigned short DllVersion;
     ConnectIRC();
 public:
-    static SOCKET CreateSocket();
-    static void Connect(SOCKET* connectingSocket, const bool secure, const char* address, const bool isServer);
-    static char** ReceiveMsg(SOCKET* receivingSocket, char* delimiter = nullptr);
-    static void SendMsg(SOCKET* sendingSocket, const char* message);
+    static pirc_socket CreateSocket();
+    static void Connect(pirc_socket* connectingSocket, const bool secure, const char* address, const bool isServer);
+    static char** ReceiveMsg(pirc_socket* receivingSocket, char* delimiter = nullptr);
+    static void SendMsg(pirc_socket* sendingSocket, const char* message);
     static void Shutdown();
 };
