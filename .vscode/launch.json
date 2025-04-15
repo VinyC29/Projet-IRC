@@ -13,7 +13,7 @@
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",
         "preLaunchTask": "Build server", // Make sure to delete the build folder when switching between build server/client.
-        "externalConsole": true
+        "console": "externalTerminal"
       },
       {
         "name": "(knob) Launch",

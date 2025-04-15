@@ -92,7 +92,6 @@ char** ConnectIRC::ReceiveMsg(pirc_socket* receivingSocket, char* delimiter) {
     }
 
     parsedResponse[i] = nullptr; // End the array with nullptr for a condition
-
     return parsedResponse;
 
 }

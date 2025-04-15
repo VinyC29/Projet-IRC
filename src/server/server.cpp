@@ -1,6 +1,6 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-
+ 
 #include "server.h"
 #include "connectIRC.h"
 
@@ -25,7 +25,7 @@ char* ProcessMessage(char** parsedResponse) {
         strcpy(response, ":projectirc.example.com 001 ");    
         strcat(response, nick);  
         strcat(response, " :Welcome to the IRC Project\r\n");
-
+      
     }
 
     return response;
