@@ -2,16 +2,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "connectIRC.h"
-#include "knob.h"
 
 #pragma comment(lib, "ws2_32.lib")
-#include <WinSock2.h>
+
 #include <stdio.h>
-#include <stdlib.h>
+#include <WinSock2.h>
 #include <WS2tcpip.h>
-#include <Windows.h>
-#include <iostream>
-#include <string>
 
 using namespace std;
 
@@ -66,7 +62,7 @@ void ConnectIRC::Connect(SOCKET* connectingSocket, const bool secure, const char
     }
 }
 
-char** ConnectIRC::ReceiveMessage(SOCKET* receivingSocket, char* delimiter) {
+char** ConnectIRC::ReceiveMsg(SOCKET* receivingSocket, char* delimiter) {
 
     char szBuffer[2048];
     char szResponse[2048];
@@ -88,17 +84,18 @@ char** ConnectIRC::ReceiveMessage(SOCKET* receivingSocket, char* delimiter) {
 
     while (token != NULL)
     {
-        parsedResponse[i] = token;
-        printf("%d : %s\n", i, parsedResponse[i]);  // Put the parsed strings in the parsedResponse array with an index.
+        parsedResponse[i] = token; // Put the parsed strings in the parsedResponse array with an index.
         token = strtok(NULL, delimiter);
         i++;
     }
+
+    parsedResponse[i] = nullptr; // End the array with nullptr for a condition
 
     return parsedResponse;
 
 }
     
-void ConnectIRC::SendMessage(SOCKET* sendingSocket, const char* message) {
+void ConnectIRC::SendMsg(SOCKET* sendingSocket, const char* message) {
     send(*sendingSocket, message, strlen(message), 0);
 }
 
