@@ -73,7 +73,21 @@
         "xloctime": "cpp",
         "xmemory": "cpp",
         "xstring": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "valarray": "cpp",
+        "array": "c",
+        "bitset": "c",
+        "deque": "c",
+        "queue": "c",
+        "random": "c",
+        "ranges": "c",
+        "regex": "c",
+        "span": "c",
+        "stack": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "__tree": "c",
+        "string_view": "c"
     },
     "cmake.configureOnOpen": false
 }

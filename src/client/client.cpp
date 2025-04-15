@@ -12,7 +12,7 @@
 #include <cstring>
 #include <string>
 #define PORT 6667
-
+    
 enum ClientState
 {
     AWAITING_CONNEXION,
@@ -29,7 +29,7 @@ Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
 
 }
 
-void Client::Start(const char* url) {
+void Client::Start(bool secure, const char* url) {
 
 	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 

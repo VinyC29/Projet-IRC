@@ -222,6 +222,7 @@ MAIN(irc_test){
         "./Libraries/raylib/src",
         "./Libraries/imgui",
         "./Libraries/rlImGui",
+        "./src/connectIRC",
     );
     if(knob_cstr_match(appcommand,"server")){
 
