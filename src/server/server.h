@@ -1,6 +1,5 @@
 #pragma once
 
-#undef ShowCursor
 #include <WinSock2.h>
 #include "IRC_Interface.h"
 
