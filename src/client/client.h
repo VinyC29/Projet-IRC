@@ -18,7 +18,6 @@ private:
     float m_Width;
     float m_Height;
     bool m_Secure;
-    u_long iMode = 1; // Mode pour le socket 0 pour blocant 1 pour non blocant
     char strNick[256] = {0};
     char strUser[256] = {0};
     SOCKET socket;

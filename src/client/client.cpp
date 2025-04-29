@@ -4,16 +4,15 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <cstring>
+#include <string>
+#include <iostream>>
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "client.h"
 #include "connectIRC.h"
-#include <cstring>
-#include <string>
-#include <iostream>>
 #define PORT "6667"
 #define URL "testnet.ergo.chat"
 
@@ -43,10 +42,10 @@ void Client::Update() {
 
     if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
     {
-        WSAStartup(DllVersion, &wsaData);
-        socket = ConnectIRC::CreateSocket();
+        socket = ConnectIRC::CreateSocket(true);
+        
         ConnectIRC::Connect(&socket, m_Secure, URL, false);
-        int iResult = ioctlsocket(socket, FIONBIO, &iMode);
+        
        
         char nick[256] = {0};
         snprintf(nick, 256, "NICK %s\r\n", strNick);
@@ -61,6 +60,8 @@ void Client::Update() {
 
         setConnexionState(AWAIT_SERVER_ANSWER_TO_CONNEXION);
     }
+
+
 
     char **parsedResponse;
     parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
