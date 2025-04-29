@@ -13,18 +13,11 @@
 #include "connectIRC.h"
 #include <cstring>
 #include <string>
+#include <iostream>>
 #define PORT "6667"
 #define URL "testnet.ergo.chat"
 
-enum ClientState
-{
-    AWAITING_CONNEXION,
-    SENDING_CONNEXION_INFO_TO_SERVER,
-    AWAIT_SERVER_ANSWER_TO_CONNEXION,
-    CONNECTED_TO_SERVER
-};
 
-ClientState connexionstate = AWAITING_CONNEXION;
 bool test = true;
 static  std::string connexionMessage = "";
 
@@ -34,40 +27,59 @@ Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
 }
 
 void Client::Start(bool secure, const char* url) {
+    bool m_Secure = secure;
 
-    WSAStartup(DllVersion, &wsaData);
+    setConnexionState(AWAITING_CONNEXION);
 
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 
 	rlImGuiSetup(true);
 
-    socket = ConnectIRC::CreateSocket();
-    ConnectIRC::Connect(&socket, secure, URL, false);
+    
+    
 }
 
 void Client::Update() {
 
-    if (connexionstate == SENDING_CONNEXION_INFO_TO_SERVER)
+    if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
     {
-
+        WSAStartup(DllVersion, &wsaData);
+        socket = ConnectIRC::CreateSocket();
+        ConnectIRC::Connect(&socket, m_Secure, URL, false);
+        int iResult = ioctlsocket(socket, FIONBIO, &iMode);
+       
         char nick[256] = {0};
         snprintf(nick, 256, "NICK %s\r\n", strNick);
         char *sendNick = nick;
 
         char user[256] = {0};
-        snprintf(user, 256, "USER %s **: %s\r\n", strNick, strUser);
+        snprintf(user, 256, "USER %s 0 **: %s\r\n", strNick, strUser);
         char *sendUser = user;
 
         ConnectIRC::SendMsg(&socket, sendNick);
         ConnectIRC::SendMsg(&socket, sendUser);
 
-        connexionstate = AWAIT_SERVER_ANSWER_TO_CONNEXION;
+        setConnexionState(AWAIT_SERVER_ANSWER_TO_CONNEXION);
     }
 
     char **parsedResponse;
     parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
 
+    if (parsedResponse != nullptr) {
+        if(m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") == 0){
+            printf("im connected to server\r\n");
+            setConnexionState(CONNECTED_TO_SERVER);
+        }
+        else if (m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") != 0) {
+            setConnexionState(AWAITING_CONNEXION);
+        }
 
+        char **ptr = parsedResponse;
+        while (*ptr != nullptr) {
+            std::cout << *ptr << std::endl;
+            ++ptr;
+        }
+    }
 }
 
 void Client::Draw() {
@@ -79,7 +91,7 @@ void Client::Draw() {
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0,0));
 
-    if (connexionstate == AWAITING_CONNEXION || connexionstate == SENDING_CONNEXION_INFO_TO_SERVER || connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION)
+    if (m_connexionState == AWAITING_CONNEXION || m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER || m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION)
     {
         ImGui::SetCursorPos(ImVec2(50, 100));
         strNick[256];
@@ -134,7 +146,7 @@ void Client::Draw() {
                 showConnexionMessage = true;
             }
             else{
-                connexionstate = SENDING_CONNEXION_INFO_TO_SERVER;
+                setConnexionState(SENDING_CONNEXION_INFO_TO_SERVER);
                 connexionMessage = ("Awaiting for server answer.");
                 showConnexionMessage = true;
             }
@@ -142,7 +154,7 @@ void Client::Draw() {
             clicked = 0;
         }
 	}    
-    else if(connexionstate == CONNECTED_TO_SERVER){
+    else if(m_connexionState == CONNECTED_TO_SERVER){
         ImGui::SetCursorPos(ImVec2(50, 100));
         static char strNick[256];
         ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
@@ -154,10 +166,11 @@ void Client::Draw() {
     rlImGuiEnd();
 }
 
-     
-
-
 void Client::End() {
     rlImGuiShutdown();
     ConnectIRC::Shutdown();
+}
+
+void Client::setConnexionState(ClientState state){
+    m_connexionState = state;
 }
