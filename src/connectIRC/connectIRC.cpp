@@ -26,12 +26,14 @@ pirc_socket ConnectIRC::CreateSocket(const bool isNonBlocking) {
     int iProtocol = IPPROTO_TCP;
 
     pirc_socket sock = socket(iFamily, iType, iProtocol);
-    if(isBlocking){
+    if (isNonBlocking)
+    {
         u_long iMode = 1; // Mode pour le socket 0 pour blocant 1 pour non blocant
         int iResult = ioctlsocket(sock, FIONBIO, &iMode);
     }
     return sock;
 }
+
 
 void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const char* address, const bool isServer) {
 

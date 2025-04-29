@@ -16,13 +16,10 @@
 #define PORT "6667"
 #define URL "testnet.ergo.chat"
 
-
-bool test = true;
 static  std::string connexionMessage = "";
 
-
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
-  
+    
 }
 
 void Client::Start(bool secure, const char* url) {
@@ -34,19 +31,17 @@ void Client::Start(bool secure, const char* url) {
 
 	rlImGuiSetup(true);
 
-    
-    
+   
+  
 }
 
 void Client::Update() {
 
     if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
     {
+        WSAStartup(DllVersion, &wsaData);
         socket = ConnectIRC::CreateSocket(true);
-        
         ConnectIRC::Connect(&socket, m_Secure, URL, false);
-        
-       
         char nick[256] = {0};
         snprintf(nick, 256, "NICK %s\r\n", strNick);
         char *sendNick = nick;
@@ -68,7 +63,6 @@ void Client::Update() {
 
     if (parsedResponse != nullptr) {
         if(m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") == 0){
-            printf("im connected to server\r\n");
             setConnexionState(CONNECTED_TO_SERVER);
         }
         else if (m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") != 0) {
@@ -77,6 +71,7 @@ void Client::Update() {
 
         char **ptr = parsedResponse;
         while (*ptr != nullptr) {
+            
             std::cout << *ptr << std::endl;
             ++ptr;
         }
