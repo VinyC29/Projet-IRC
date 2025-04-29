@@ -55,8 +55,11 @@ void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         
-        getaddrinfo(address, (PCSTR)port, &hints, &ptr);
-        
+        char portStr[6];
+        snprintf(portStr, sizeof(portStr), "%d", port);
+
+        getaddrinfo(address, portStr, &hints, &ptr);
+
         connect(*connectingSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
         freeaddrinfo(ptr);
