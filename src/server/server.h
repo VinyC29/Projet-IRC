@@ -23,3 +23,5 @@ public:
     void Draw() override;
     void End() override;
 };
+
+char* ProcessMessage(char** parsedResponse);

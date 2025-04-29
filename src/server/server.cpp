@@ -7,6 +7,8 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <stdio.h>
 
+const char* hostURL;
+
 void PrintParsedMessages(char** parsedResponse) {
     for (int i = 0; parsedResponse[i] != nullptr; i++) {
         printf("%d | %s\n", i, parsedResponse[i]);
@@ -14,13 +16,13 @@ void PrintParsedMessages(char** parsedResponse) {
 }
 
 char* ProcessMessage(char** parsedResponse) {
-    PrintParsedMessages(parsedResponse);
+    //PrintParsedMessages(parsedResponse);
 
     char response[1024] = "ERROR";
 
-    if (strcmp(parsedResponse[3], "NICK") == 0) {
+    if (strcmp(parsedResponse[0], "NICK") == 0) {
 
-        char* nick = parsedResponse[4];
+        char* nick = parsedResponse[3];
 
         strcpy(response, ":projectirc.example.com 001 ");    
         strcat(response, nick);  
@@ -37,6 +39,8 @@ char* ProcessMessage(char** parsedResponse) {
 
 void Server::Start(bool secureBoolean, const char* url) {
     
+    hostURL = url;
+
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
 

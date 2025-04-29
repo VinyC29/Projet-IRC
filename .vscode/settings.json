@@ -87,7 +87,12 @@
         "__hash_table": "c",
         "__split_buffer": "c",
         "__tree": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "*.rh": "c",
+        "cerrno": "c",
+        "cfloat": "c",
+        "climits": "c",
+        "*.m": "c"
     },
     "cmake.configureOnOpen": false
 }

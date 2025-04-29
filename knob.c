@@ -124,16 +124,22 @@ int build_tests(Knob_Config config){
     knob_log(KNOB_INFO,"Building Tests");
     Knob_File_Paths files = {0};
     knob_da_mult_append(&files,
+        "src"PATH_SEP"connectIRC/connectIRC.cpp",
+        "src"PATH_SEP"server/server.cpp",
+        "src"PATH_SEP"serverUnitTest.cpp",
         "src"PATH_SEP"function_to_test.c",
         "tests"PATH_SEP"example_test.c",
     );
     config.build_to = "."PATH_SEP"build"PATH_SEP"tests";
     if(!knob_mkdir_if_not_exists(config.build_to)){ return 1;}
+    if(!knob_mkdir_if_not_exists("."PATH_SEP"build"PATH_SEP"tests/connectIRC")){ return 1;}
+    if(!knob_mkdir_if_not_exists("."PATH_SEP"build"PATH_SEP"tests/server")){ return 1;}
     knob_config_add_files(&config,files.items,files.count);
     files.count = 0;
     knob_da_mult_append(&files,
         ".",
         "./src",
+        "src"PATH_SEP"connectIRC",
     );
     knob_config_add_includes(&config,files.items,files.count);
     Knob_File_Paths out_files = {0};
@@ -145,6 +151,10 @@ int build_tests(Knob_Config config){
     for(int i =0; i < out_files.count;++i){
         knob_cmd_append(&cmd,out_files.items[i]);
     }
+
+    knob_cmd_append(&cmd,"-lws2_32");
+    knob_cmd_append(&cmd,"-lm");
+    knob_cmd_append(&cmd,"-lstdc++");
 
     knob_cmd_append(&cmd,"-o","./tests/tests.com");
     for(int i =0; i < config.cpp_flags.count;++i){
@@ -174,6 +184,7 @@ MAIN(irc_test){
     knob_config_init(&config);
     config.compiler = COMPILER_ZIG;
     config.compiler_path = ZIG_PATH;
+    config.debug_mode = 1;
 
     const char* program = knob_shift_args(&argc,&argv);
     char* subcommand = NULL;

@@ -50,6 +50,19 @@
             },
             "args": ["build", "server"],
             "dependsOn": "Build knob",
+        },
+
+        {
+            "label": "Build tests",
+            "type": "shell",
+            "windows":{
+                "command": "${workspaceFolder}/knob.exe",
+            },
+            "linux":{
+                "command": "${workspaceFolder}/knob",
+            },
+            "args": ["tests"],
+            "dependsOn": "Build knob",
         }
     ]
 }

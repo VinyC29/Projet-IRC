@@ -27,6 +27,19 @@
         "cwd": "${workspaceRoot}",
         "preLaunchTask": "Build knob"
       }
+      ,
+      {
+        "name": "(tests) Launch",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "windows": {
+          "program": "${workspaceFolder}/tests/tests.com",
+        },
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceRoot}",
+        "preLaunchTask": "Build tests"
+      }
     ]
         
     
