@@ -18,6 +18,9 @@
 
 static  std::string connexionMessage = "";
 
+// testnet.ergo doit attendre 15 sec pour avoir la liste des channels
+bool haveChannel = false;
+
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
     
 }
@@ -36,7 +39,7 @@ void Client::Start(bool secure, const char* url) {
 }
 
 void Client::Update() {
-
+    
     if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
     {
         WSAStartup(DllVersion, &wsaData);
@@ -58,7 +61,13 @@ void Client::Update() {
         setConnexionState(AWAIT_SERVER_ANSWER_TO_CONNEXION);
     }
 
-
+    if(m_connexionState == CONNECTED_TO_SERVER && !haveChannel){
+        Sleep(15000);
+        char seeChannel[256] = {0};
+        snprintf(seeChannel, 256, "LIST\r\n");
+        ConnectIRC::SendMsg(&socket, seeChannel);
+        haveChannel = true;
+    }
 
     char **parsedResponse;
     parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
@@ -69,6 +78,12 @@ void Client::Update() {
         }
         else if (m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") != 0) {
             setConnexionState(AWAITING_CONNEXION);
+        }
+
+        if(strcmp(parsedResponse[0], "PING") == 0){
+            char pingAnswer[256] = {0};
+            snprintf(pingAnswer, 256, "PONG :%s\r\n", parsedResponse[1]);
+            ConnectIRC::SendMsg(&socket, pingAnswer);
         }
 
         char **ptr = parsedResponse;
