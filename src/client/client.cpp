@@ -40,8 +40,10 @@ void Client::Update() {
     if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
     {
         WSAStartup(DllVersion, &wsaData);
-        socket = ConnectIRC::CreateSocket(true);
+        socket = ConnectIRC::CreateSocket();
         ConnectIRC::Connect(&socket, m_Secure, URL, false);
+        u_long iMode = 1;
+        ioctlsocket(socket, FIONBIO, &iMode);
         char nick[256] = {0};
         snprintf(nick, 256, "NICK %s\r\n", strNick);
         char *sendNick = nick;
