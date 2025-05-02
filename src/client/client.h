@@ -18,8 +18,10 @@ private:
     float m_Width;
     float m_Height;
     bool m_Secure;
+    bool m_Channel = false;
     char strNick[256] = {0};
     char strUser[256] = {0};
+    char* channels[256] = {0};
     SOCKET socket;
     WSAData wsaData;
     WORD DllVersion = MAKEWORD(2, 1);

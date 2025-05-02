@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <string>
-#include <iostream>>
+#include <iostream>
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib.h"
@@ -20,6 +20,7 @@ static  std::string connexionMessage = "";
 
 // testnet.ergo doit attendre 15 sec pour avoir la liste des channels
 bool haveChannel = false;
+bool listChannel = false;
 
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
     
@@ -33,9 +34,6 @@ void Client::Start(bool secure, const char* url) {
     SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 
 	rlImGuiSetup(true);
-
-   
-  
 }
 
 void Client::Update() {
@@ -67,6 +65,7 @@ void Client::Update() {
         snprintf(seeChannel, 256, "LIST\r\n");
         ConnectIRC::SendMsg(&socket, seeChannel);
         haveChannel = true;
+        listChannel = true;
     }
 
     char **parsedResponse;
@@ -86,6 +85,21 @@ void Client::Update() {
             ConnectIRC::SendMsg(&socket, pingAnswer);
         }
 
+        if(strcmp(parsedResponse[1], "322") == 0){
+            int channelCount = 0;
+            char **prtchannel = parsedResponse;
+
+            while (*prtchannel != nullptr) {
+                if (strcmp(*prtchannel, "322") == 0) {
+                    char* channelToken = *(prtchannel + 2);
+                    channels[channelCount] = strdup(channelToken + 1);
+                    channelCount++;
+                }
+                ++prtchannel;  
+            }
+            haveChannel = true;             
+        }
+        
         char **ptr = parsedResponse;
         while (*ptr != nullptr) {
             
@@ -94,6 +108,9 @@ void Client::Update() {
         }
     }
 }
+
+       
+
 
 void Client::Draw() {
     // Library/rllmGui/example/simple
@@ -128,8 +145,6 @@ void Client::Draw() {
             ImGui::Text("%s" ,connexionMessage.c_str());
         }
         
-        
-
         if (clicked)
         {
             bool invalidUsername = false;
@@ -168,13 +183,39 @@ void Client::Draw() {
         }
 	}    
     else if(m_connexionState == CONNECTED_TO_SERVER){
-        ImGui::SetCursorPos(ImVec2(50, 100));
-        static char strNick[256];
-        ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
+    
+            // BeginListBox() is essentially a thin wrapper to using BeginChild()/EndChild()
+            // using the ImGuiChildFlags_FrameStyle flag for stylistic changes + displaying a label.
+            // You may be tempted to simply use BeginChild() directly. However note that BeginChild() requires EndChild()
+            // to always be called (inconsistent with BeginListBox()/EndListBox()).
 
-        ImGui::SetCursorPos(ImVec2(50, 135));
-        static char strUser[256];
-        ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
+            // Using the generic BeginListBox() API, you have full control over how to display the combo contents.
+            // (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
+            // stored in the object itself, etc.)
+            static char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
+            static int item_selected_idx = 0; // Here we store our selected data as an index.
+
+            static bool item_highlight = true;
+            int item_highlighted_idx = -1; // Here we store our highlighted data as an index.
+
+            if(haveChannel){
+                ImGui::Text("Available channels");
+                if (ImGui::BeginListBox("##listbox 2", ImVec2(200, 5 * ImGui::GetTextLineHeightWithSpacing())))
+                {
+                    for (int n = 0; n < IM_ARRAYSIZE(channels); n++)
+                    {
+                        bool is_selected = (item_selected_idx == n);
+                        ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
+                        if (ImGui::Selectable(channels[n], is_selected, flags))
+                            item_selected_idx = n;
+
+                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                        if (is_selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndListBox();
+            }
+        }
     }
     rlImGuiEnd();
 }
