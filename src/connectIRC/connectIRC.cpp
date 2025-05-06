@@ -19,7 +19,7 @@ ConnectIRC::ConnectIRC() {
     WSAStartup(DllVersion, wsaData);  
 }
 
-pirc_socket ConnectIRC::CreateSocket(const bool isNonBlocking) {
+pirc_socket ConnectIRC::CreateSocket() {
     
     // Create Socket
     int iFamily = AF_INET;
@@ -27,10 +27,6 @@ pirc_socket ConnectIRC::CreateSocket(const bool isNonBlocking) {
     int iProtocol = IPPROTO_TCP;
 
     pirc_socket sock = socket(iFamily, iType, iProtocol);
-    if (isNonBlocking)
-    {
-      
-    }
     return sock;
 }
 

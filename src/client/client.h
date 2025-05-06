@@ -17,6 +17,7 @@ private:
     ClientState m_connexionState = AWAITING_CONNEXION;
     float m_Width;
     float m_Height;
+    int channelCount = 0;
     bool m_Secure;
     bool m_Channel = false;
     char strNick[256] = {0};

@@ -59,12 +59,11 @@ void Client::Update() {
         setConnexionState(AWAIT_SERVER_ANSWER_TO_CONNEXION);
     }
 
-    if(m_connexionState == CONNECTED_TO_SERVER && !haveChannel){
+    if(m_connexionState == CONNECTED_TO_SERVER && !listChannel){
         Sleep(15000);
         char seeChannel[256] = {0};
         snprintf(seeChannel, 256, "LIST\r\n");
         ConnectIRC::SendMsg(&socket, seeChannel);
-        haveChannel = true;
         listChannel = true;
     }
 
@@ -85,21 +84,21 @@ void Client::Update() {
             ConnectIRC::SendMsg(&socket, pingAnswer);
         }
 
-        if(strcmp(parsedResponse[1], "322") == 0){
-            int channelCount = 0;
-            char **prtchannel = parsedResponse;
+
+        char **prtchannel = parsedResponse;
 
             while (*prtchannel != nullptr) {
                 if (strcmp(*prtchannel, "322") == 0) {
                     char* channelToken = *(prtchannel + 2);
-                    channels[channelCount] = strdup(channelToken + 1);
-                    channelCount++;
+                    if(channelToken != nullptr){
+                        channels[channelCount] = strdup(channelToken);
+                        channelCount++;
+                    }  
+                    haveChannel = true; 
                 }
                 ++prtchannel;  
             }
-            haveChannel = true;             
-        }
-        
+                      
         char **ptr = parsedResponse;
         while (*ptr != nullptr) {
             
@@ -183,37 +182,28 @@ void Client::Draw() {
         }
 	}    
     else if(m_connexionState == CONNECTED_TO_SERVER){
-    
-            // BeginListBox() is essentially a thin wrapper to using BeginChild()/EndChild()
-            // using the ImGuiChildFlags_FrameStyle flag for stylistic changes + displaying a label.
-            // You may be tempted to simply use BeginChild() directly. However note that BeginChild() requires EndChild()
-            // to always be called (inconsistent with BeginListBox()/EndListBox()).
 
-            // Using the generic BeginListBox() API, you have full control over how to display the combo contents.
-            // (your selection data could be an index, a pointer to the object, an id for the object, a flag intrusively
-            // stored in the object itself, etc.)
-            static char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
-            static int item_selected_idx = 0; // Here we store our selected data as an index.
+        static int item_selected_idx = 0; // Here we store our selected data as an index.
+        static bool item_highlight = true;
+        int item_highlighted_idx = -1; // Here we store our highlighted data as an index.
 
-            static bool item_highlight = true;
-            int item_highlighted_idx = -1; // Here we store our highlighted data as an index.
-
-            if(haveChannel){
-                ImGui::Text("Available channels");
-                if (ImGui::BeginListBox("##listbox 2", ImVec2(200, 5 * ImGui::GetTextLineHeightWithSpacing())))
+        if(haveChannel){
+            ImGui::Text("Available channels");
+            if (ImGui::BeginListBox("##listbox 2", ImVec2(200, 25 * ImGui::GetTextLineHeightWithSpacing())))
+            {
+                for (int n = 0; n < channelCount; n++)
                 {
-                    for (int n = 0; n < IM_ARRAYSIZE(channels); n++)
-                    {
-                        bool is_selected = (item_selected_idx == n);
-                        ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
-                        if (ImGui::Selectable(channels[n], is_selected, flags))
-                            item_selected_idx = n;
+                    bool is_selected = (item_selected_idx == n);
+                    ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
+                    if (ImGui::Selectable(channels[n], is_selected, flags))
+                        item_selected_idx = n;
+                        std::cout<<channels[n]<<std::endl;
 
                         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                        if (is_selected)
-                            ImGui::SetItemDefaultFocus();
-                    }
-                    ImGui::EndListBox();
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndListBox();
             }
         }
     }
