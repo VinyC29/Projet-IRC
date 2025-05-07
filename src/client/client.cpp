@@ -68,10 +68,23 @@ void Client::Update() {
     }
 
     if(m_connexionState == JOINNIG_CHANNEL){
+        if (!m_FirstJoin)
+        {
+            char partChannel[256] = {0};
+            snprintf(partChannel, 256, "PART %s\r\n", strOldChannel);
+            ConnectIRC::SendMsg(&socket, partChannel);
+            std::cout << "Part Channel" << std::endl;
+        }
+
         char joinChannel[256] = {0};
-        snprintf(joinChannel, 256, "JOIN ", strChannel, "\r\n");
+        snprintf(joinChannel, 256, "JOIN %s\r\n", strChannel);
+
         ConnectIRC::SendMsg(&socket, joinChannel);
         m_connexionState = CONNECTED_TO_SERVER;
+        
+        if(m_FirstJoin){
+            m_FirstJoin = false;
+        }
     }
 
     char **parsedResponse;
@@ -211,9 +224,7 @@ void Client::Draw() {
                                 strcpy(strOldChannel, strChannel);
                             }
                             strcpy(strChannel, channels[item_selected_idx]);
-                            m_FirstJoin = false;
                             m_connexionState = JOINNIG_CHANNEL;
-                            std::cout << "Selection changed to: " << channels[item_selected_idx] << std::endl;
                         }
                     }
                     // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
