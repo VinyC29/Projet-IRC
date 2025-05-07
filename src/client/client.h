@@ -7,7 +7,8 @@ enum ClientState
     AWAITING_CONNEXION,
     SENDING_CONNEXION_INFO_TO_SERVER,
     AWAIT_SERVER_ANSWER_TO_CONNEXION,
-    CONNECTED_TO_SERVER
+    CONNECTED_TO_SERVER,
+    JOINNIG_CHANNEL
 };
 
 
@@ -20,6 +21,9 @@ private:
     int channelCount = 0;
     bool m_Secure;
     bool m_Channel = false;
+    bool m_FirstJoin = true;
+    char strChannel[256] = {0};
+    char strOldChannel[256] = {0};
     char strNick[256] = {0};
     char strUser[256] = {0};
     char* channels[256] = {0};

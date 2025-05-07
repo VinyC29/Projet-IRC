@@ -42,7 +42,7 @@ void Client::Update() {
     {
         WSAStartup(DllVersion, &wsaData);
         socket = ConnectIRC::CreateSocket();
-        ConnectIRC::Connect(&socket, m_Secure, URL, false);
+        ConnectIRC::Connect(&socket, false, URL, false);
         u_long iMode = 1;
         ioctlsocket(socket, FIONBIO, &iMode);
         char nick[256] = {0};
@@ -65,6 +65,13 @@ void Client::Update() {
         snprintf(seeChannel, 256, "LIST\r\n");
         ConnectIRC::SendMsg(&socket, seeChannel);
         listChannel = true;
+    }
+
+    if(m_connexionState == JOINNIG_CHANNEL){
+        char joinChannel[256] = {0};
+        snprintf(joinChannel, 256, "JOIN ", strChannel, "\r\n");
+        ConnectIRC::SendMsg(&socket, joinChannel);
+        m_connexionState = CONNECTED_TO_SERVER;
     }
 
     char **parsedResponse;
@@ -181,7 +188,7 @@ void Client::Draw() {
             clicked = 0;
         }
 	}    
-    else if(m_connexionState == CONNECTED_TO_SERVER){
+    else if(m_connexionState == CONNECTED_TO_SERVER || m_connexionState == JOINNIG_CHANNEL){
 
         static int item_selected_idx = 0; // Here we store our selected data as an index.
         static bool item_highlight = true;
@@ -196,10 +203,20 @@ void Client::Draw() {
                     bool is_selected = (item_selected_idx == n);
                     ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
                     if (ImGui::Selectable(channels[n], is_selected, flags))
-                        item_selected_idx = n;
-                        std::cout<<channels[n]<<std::endl;
-
-                        // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    {
+                        if (item_selected_idx != n)
+                        {
+                            item_selected_idx = n;
+                            if(!m_FirstJoin){
+                                strcpy(strOldChannel, strChannel);
+                            }
+                            strcpy(strChannel, channels[item_selected_idx]);
+                            m_FirstJoin = false;
+                            m_connexionState = JOINNIG_CHANNEL;
+                            std::cout << "Selection changed to: " << channels[item_selected_idx] << std::endl;
+                        }
+                    }
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
                     if (is_selected)
                         ImGui::SetItemDefaultFocus();
                 }
