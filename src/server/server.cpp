@@ -13,10 +13,45 @@ void PrintParsedMessages(char** parsedResponse) {
     }
 }
 
+Channel CreateChannel(const char* newChannelName) {
+    Channel newChannel;
+
+    newChannel.ChannelName = new char[strlen(newChannelName) + 1];
+    strcpy(newChannel.ChannelName, newChannelName);
+
+    newChannel.FilePath = new char[strlen(newChannel.ChannelName) + 5];
+    sprintf(newChannel.FilePath, "%s.txt", newChannel.ChannelName);
+
+    newChannel.MessageHistory = fopen(newChannel.FilePath, "w");
+    if (newChannel.MessageHistory == nullptr) {
+        perror("Error creating file");
+    }
+
+    newChannel.ClientNames.clear();
+
+    delete[] newChannel.ChannelName;
+    delete[] newChannel.FilePath;                   // Clean stuff up.
+    if (newChannel.MessageHistory != nullptr) { 
+        fclose(newChannel.MessageHistory);
+    }
+
+    return newChannel;
+}
+
 char* ProcessMessage(char** parsedResponse) {
     PrintParsedMessages(parsedResponse);
 
     char response[1024] = "ERROR";
+
+    if (strcmp(parsedResponse[3], "NICK") == 0) {
+
+        char* nick = parsedResponse[4];
+
+        strcpy(response, ":projectirc.example.com 001 ");    
+        strcat(response, nick);  
+        strcat(response, " :Welcome to the IRC Project\r\n");
+      
+    }
 
     if (strcmp(parsedResponse[3], "NICK") == 0) {
 
@@ -36,6 +71,9 @@ char* ProcessMessage(char** parsedResponse) {
 /* -------- ↓ ----------- ↓ -------- */
 
 void Server::Start(bool secureBoolean, const char* url) {
+
+    Channel myChannel = CreateChannel("Default");
+    channels.push_back(myChannel);
     
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
@@ -49,7 +87,7 @@ void Server::Start(bool secureBoolean, const char* url) {
     clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientAddrLength);
 
     u_long mode = 1;
-    ioctlsocket(clientSocket, FIONBIO, &mode); // Stop the client socket from blocking the execution
+    ioctlsocket(clientSocket, FIONBIO, &mode);
 
     printf("Client connected\n");
 

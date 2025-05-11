@@ -2,15 +2,27 @@
 
 #include <WinSock2.h>
 #include "IRC_Interface.h"
+#include "vector"
+
+using namespace std;
+
+typedef struct Channel {
+    char* ChannelName;
+    char* FilePath;
+    FILE* MessageHistory;
+    vector<char*> ClientNames;
+};
 
 class Server : public IRC_Interface {
 private:
 
-WSAData wsaData;
-WORD DllVersion = MAKEWORD(2, 1);
+    WSAData wsaData;
+    WORD DllVersion = MAKEWORD(2, 1);
 
-SOCKET serverSocket;
-SOCKET clientSocket;
+    SOCKET serverSocket;
+    SOCKET clientSocket;
+
+    vector<Channel> channels;
 
 public:
 
