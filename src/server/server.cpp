@@ -31,11 +31,17 @@ Channel CreateChannel(const char* newChannelName) {
 
     delete[] newChannel.ChannelName;
     delete[] newChannel.FilePath;                   // Clean stuff up.
-    if (newChannel.MessageHistory != nullptr) { 
+    if (newChannel.MessageHistory != nullptr) {
         fclose(newChannel.MessageHistory);
     }
 
     return newChannel;
+}
+
+void WriteFileMessage(Channel channel, char* message) {
+    if (channel.MessageHistory != nullptr) {
+        fflush(channel.MessageHistory);
+    }
 }
 
 char* ProcessMessage(char** parsedResponse) {
@@ -74,6 +80,9 @@ void Server::Start(bool secureBoolean, const char* url) {
 
     Channel myChannel = CreateChannel("Default");
     channels.push_back(myChannel);
+
+    //WriteFileMessage(channels.at(0), "Yooo");     // This won't work and I have no idea why
+    //WriteFileMessage(channels.at(0), "Heyyy");    // This won't work and I have no idea why
     
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
