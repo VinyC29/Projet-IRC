@@ -65,12 +65,27 @@ char* Server::ProcessMessage(char** parsedResponse) {
         char* channel = parsedResponse[1];
 
         strcpy(response, clientNickname);
-        strcat(response, "\r\nJOIN");  
+        strcat(response, "\r\nJOIN ");  
         strcat(response, channel);
 
         for (int i = 0; i < channels.size(); i++){
             if (channels[i].ChannelName == channel) {
                 channels[i].ClientNames.push_back(clientNickname);
+            }
+        }
+    }
+
+    if (strcmp(parsedResponse[0], "PART") == 0) {
+
+        char* channel = parsedResponse[1];
+
+        strcpy(response, clientNickname);
+        strcat(response, "\r\nPART ");  
+        strcat(response, channel);
+
+        for (int i = 0; i < channels.size(); i++){
+            if (channels[i].ChannelName == channel) {
+                channels[i].ClientNames.erase(std::remove(channels[i].ClientNames.begin(), channels[i].ClientNames.end(), clientNickname), channels[i].ClientNames.end());
             }
         }
     }
