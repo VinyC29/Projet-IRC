@@ -44,7 +44,7 @@ void WriteFileMessage(Channel channel, char* message) {
     }
 }
 
-char* ProcessMessage(char** parsedResponse) {
+char* Server::ProcessMessage(char** parsedResponse) {
     PrintParsedMessages(parsedResponse);
 
     char response[1024] = "ERROR";
@@ -57,6 +57,22 @@ char* ProcessMessage(char** parsedResponse) {
         strcat(response, nick);  
         strcat(response, " :Welcome to the IRC Project\r\n");
       
+        clientNickname = nick;
+    }
+
+    if (strcmp(parsedResponse[0], "JOIN") == 0) {
+
+        char* channel = parsedResponse[1];
+
+        strcpy(response, clientNickname);
+        strcat(response, "\r\nJOIN");  
+        strcat(response, channel);
+
+        for (int i = 0; i < channels.size(); i++){
+            if (channels[i].ChannelName == channel) {
+                channels[i].ClientNames.push_back(clientNickname);
+            }
+        }
     }
 
     return response;

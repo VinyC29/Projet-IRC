@@ -21,8 +21,11 @@ private:
 
     SOCKET serverSocket;
     SOCKET clientSocket;
+    char* clientNickname;
 
     vector<Channel> channels;
+
+    char* ProcessMessage(char** parsedResponse);
 
 public:
 
