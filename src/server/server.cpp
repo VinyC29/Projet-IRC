@@ -59,16 +59,6 @@ char* ProcessMessage(char** parsedResponse) {
       
     }
 
-    if (strcmp(parsedResponse[3], "NICK") == 0) {
-
-        char* nick = parsedResponse[4];
-
-        strcpy(response, ":projectirc.example.com 001 ");    
-        strcat(response, nick);  
-        strcat(response, " :Welcome to the IRC Project\r\n");
-      
-    }
-
     return response;
 }
 
