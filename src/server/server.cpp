@@ -7,6 +7,13 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <stdio.h>
 
+#include "rlImGui.h"
+#include "imgui.h"
+
+Server::Server(float w,float h) : m_Width(w), m_Height(h)  {
+    WSAStartup(DllVersion, &wsaData);
+}
+
 void PrintParsedMessages(char** parsedResponse) {
     for (int i = 0; parsedResponse[i] != nullptr; i++) {
         printf("%d | %s\n", i, parsedResponse[i]);
@@ -16,27 +23,20 @@ void PrintParsedMessages(char** parsedResponse) {
 Channel CreateChannel(const char* newChannelName) {
     Channel newChannel;
 
-    newChannel.ChannelName = new char[strlen(newChannelName) + 1];
-    strcpy(newChannel.ChannelName, newChannelName);
+    newChannel.ChannelName = string(newChannelName);
 
-    newChannel.FilePath = new char[strlen(newChannel.ChannelName) + 5];
-    sprintf(newChannel.FilePath, "%s.txt", newChannel.ChannelName);
+    newChannel.FilePath = newChannel.ChannelName + ".txt";
 
-    newChannel.MessageHistory = fopen(newChannel.FilePath, "w");
+    newChannel.MessageHistory = fopen(newChannel.FilePath.c_str(), "w");
     if (newChannel.MessageHistory == nullptr) {
         perror("Error creating file");
     }
 
     newChannel.ClientNames.clear();
 
-    delete[] newChannel.ChannelName;
-    delete[] newChannel.FilePath;                   // Clean stuff up.
-    if (newChannel.MessageHistory != nullptr) {
-        fclose(newChannel.MessageHistory);
-    }
-
     return newChannel;
 }
+
 
 void WriteFileMessage(Channel channel, char* message) {
     if (channel.MessageHistory != nullptr) {
@@ -99,8 +99,14 @@ char* Server::ProcessMessage(char** parsedResponse) {
 
 void Server::Start(bool secureBoolean, const char* url) {
 
-    Channel myChannel = CreateChannel("Default");
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+
+	rlImGuiSetup(true);
+
+    Channel myChannel = CreateChannel("#Default");
+    Channel myChannel1 = CreateChannel("#DefaultAlt");
     channels.push_back(myChannel);
+    channels.push_back(myChannel1);
 
     //WriteFileMessage(channels.at(0), "Yooo");     // This won't work and I have no idea why
     //WriteFileMessage(channels.at(0), "Heyyy");    // This won't work and I have no idea why
@@ -142,8 +148,36 @@ void Server::Update() {
 }
 
 void Server::Draw() {
+    rlImGuiBegin();
 
+    ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
+    ImGui::SetWindowPos(ImVec2(0, 0));
+
+    ImGui::Text("%s", "Existing Channels:");
+
+    for (int i = 0; i < channels.size(); i++) {
+
+        ImGui::BulletText("%s", channels[i].ChannelName.c_str());
+
+        if (!channels[i].ClientNames.empty()) {
+            ImGui::Indent();
+            ImGui::Text("Connected Clients:");
+
+            for (int j = 0; j < channels[i].ClientNames.size(); j++) {
+                ImGui::BulletText("%s", channels[i].ClientNames[j].c_str());
+            }
+
+            ImGui::Unindent();
+        } else {
+            ImGui::Text("No clients connected.");
+        }
+    }
+
+    rlImGuiEnd();
 }
+
+
+
 
 void Server::End() {
     ConnectIRC::Shutdown();

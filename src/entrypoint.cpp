@@ -17,7 +17,7 @@ void raylib_start(void){
     
     Color background = RED;
     #ifdef SERVER
-    app = new Server();
+    app = new Server(w,h);
     #elif defined(CLIENT)
     background = BLUE;
     app = new Client(w,h);

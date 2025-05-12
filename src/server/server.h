@@ -3,14 +3,15 @@
 #include <WinSock2.h>
 #include "IRC_Interface.h"
 #include "vector"
+#include "string"
 
 using namespace std;
 
 typedef struct Channel {
-    char* ChannelName;
-    char* FilePath;
+    string ChannelName;
+    string FilePath;
     FILE* MessageHistory;
-    vector<char*> ClientNames;
+    std::vector<string> ClientNames;
 };
 
 class Server : public IRC_Interface {
@@ -27,11 +28,11 @@ private:
 
     char* ProcessMessage(char** parsedResponse);
 
-public:
+    float m_Width;
+    float m_Height;
 
-    Server() {
-        WSAStartup(DllVersion, &wsaData);
-    }
+public:
+    Server(float width,float height);
 
     void Start(bool secure, const char* url) override;
     void Update() override;
