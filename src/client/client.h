@@ -15,7 +15,7 @@ enum ClientState
 
 class Client : public IRC_Interface {
 private:
-    ClientState m_connexionState = AWAITING_CONNEXION;
+    ClientState m_connexionState = AWAIT_SERVER_ANSWER_TO_CONNEXION;
     float m_Width;
     float m_Height;
     int channelCount = 0;

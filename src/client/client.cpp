@@ -237,9 +237,18 @@ void Client::Draw() {
             }
         }
 
-        ImGui::SetCursorPos(ImVec2(200, 135));
-        strMsg[256];
-        ImGui::InputTextWithHint("Message", "Input message here", strMsg, IM_ARRAYSIZE(strMsg));
+        ImGui::SetCursorPos(ImVec2(225, 400));
+        static char strMsg[256] = "";
+        ImGui::InputTextMultiline("##ChatInput", strMsg, IM_ARRAYSIZE(strMsg), ImVec2(600, 100));
+
+        static int clicked = 0;
+        static bool showConnexionMessage = false;
+        
+        ImGui::SetCursorPos(ImVec2(850, 400));
+        if (ImGui::Button("Send Message", ImVec2(200, 100)))
+        {
+            clicked++;
+        }
     }
     rlImGuiEnd();
 }
