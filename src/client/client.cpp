@@ -77,7 +77,9 @@ void Client::Update() {
         }
 
         char joinChannel[256] = {0};
+        char chatHistory[256] = {0};
         snprintf(joinChannel, 256, "JOIN %s\r\n", strChannel);
+        snprintf(chatHistory, 256, "CHATHISTORY LATEST %s * 50\r\n", strChannel);
 
         ConnectIRC::SendMsg(&socket, joinChannel);
         m_connexionState = CONNECTED_TO_SERVER;
@@ -234,6 +236,10 @@ void Client::Draw() {
                 ImGui::EndListBox();
             }
         }
+
+        ImGui::SetCursorPos(ImVec2(200, 135));
+        strMsg[256];
+        ImGui::InputTextWithHint("Message", "Input message here", strMsg, IM_ARRAYSIZE(strMsg));
     }
     rlImGuiEnd();
 }

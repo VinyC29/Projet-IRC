@@ -26,6 +26,7 @@ private:
     char strOldChannel[256] = {0};
     char strNick[256] = {0};
     char strUser[256] = {0};
+    char strMsg [256] = {0};
     char* channels[256] = {0};
     SOCKET socket;
     WSAData wsaData;
