@@ -88,6 +88,11 @@
         "__split_buffer": "c",
         "__tree": "c",
         "string_view": "c",
+        "*.rh": "c",
+        "cerrno": "c",
+        "cfloat": "c",
+        "climits": "c",
+        "*.m": "c"
         "coroutine": "cpp",
         "forward_list": "cpp",
         "iomanip": "cpp",

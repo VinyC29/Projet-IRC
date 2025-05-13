@@ -49,9 +49,9 @@ char* Server::ProcessMessage(char** parsedResponse) {
 
     char response[1024] = "ERROR";
 
-    if (strcmp(parsedResponse[3], "NICK") == 0) {
+    if (strcmp(parsedResponse[0], "NICK") == 0) {
 
-        char* nick = parsedResponse[4];
+        char* nick = parsedResponse[3];
 
         strcpy(response, ":projectirc.example.com 001 ");    
         strcat(response, nick);  
@@ -111,6 +111,8 @@ void Server::Start(bool secureBoolean, const char* url) {
     //WriteFileMessage(channels.at(0), "Yooo");     // This won't work and I have no idea why
     //WriteFileMessage(channels.at(0), "Heyyy");    // This won't work and I have no idea why
     
+    hostURL = url;
+
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
 
