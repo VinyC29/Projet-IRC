@@ -77,10 +77,8 @@ void Client::Update() {
         char joinChannel[256] = {0};
         char chatHistory[256] = {0};
         snprintf(joinChannel, 256, "JOIN %s\r\n", strChannel);
-        snprintf(chatHistory, 256, "CHATHISTORY LATEST %s * 50\r\n", strChannel);
 
         ConnectIRC::SendMsg(&socket, joinChannel);
-        ConnectIRC::SendMsg(&socket, chatHistory);
         m_connexionState = CONNECTED_TO_SERVER;
         
         if(m_FirstJoin){
@@ -134,14 +132,30 @@ void Client::Update() {
                     haveChannel = true;
                 }
 
-                if (strcmp(*ptrCode, "366") == 0)
+                if (strcmp(*ptrCode, "353") == 0)
                 {
-                    ptrCode++;
-                    while (strcmp(*ptrCode, strChannel) == 0){
-                        char *userToken = *(ptrCode);
-                        userChannels[channelUsers] = strdup(userToken);
-                        channelUsers++;
-                        ptrCode++;
+                    for (int i = 0; i < channelUsers; i++)
+                    {
+                        free(userChannels[i]);
+                        userChannels[i] = nullptr;
+                    }
+                    channelUsers = 0;
+
+                    char **userPtr = ptrCode + 5;
+                    while (*userPtr != nullptr)
+                    {
+
+                        if (strcmp(*userPtr, "366") == 0)
+                        {
+                            break;
+                        }
+                        
+                        char *token = *userPtr;
+                        if (token[0] == ':')
+                            token++;
+
+                        userChannels[channelUsers++] = _strdup(token);
+                        userPtr++;
                     }
                 }
 
@@ -291,7 +305,8 @@ void Client::Draw() {
 
         if (!m_FirstJoin)
         {
-            if (ImGui::BeginListBox("##listbox users", ImVec2(1075, 25 * ImGui::GetTextLineHeightWithSpacing())))
+            ImGui::SetCursorPos(ImVec2(1075, 50));
+            if (ImGui::BeginListBox("##listbox users", ImVec2(200, 25 * ImGui::GetTextLineHeightWithSpacing())))
             {
                 for (int n = 0; n < channelUsers; n++)
                 {
