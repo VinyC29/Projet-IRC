@@ -7,13 +7,10 @@
 #include <cstring>
 #include <string>
 #include "imgui.h"
-#include "rlImGui.h"
-#include "raylib.h"
-#include "raymath.h"
-#include "client.h"
+#include "client.h" 
 #include "connectIRC.h"
 #define PORT "6667"
-#define URL "testnet.ergo.chat"
+#define URL "irc.libera.chat"
 
 static  std::string connexionMessage = "";
 
@@ -30,9 +27,6 @@ void Client::Start(bool secure, const char* url) {
 
     setConnexionState(AWAITING_CONNEXION);
 
-    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
-
-	rlImGuiSetup(true);
 }
 
 void Client::Update() {
@@ -105,8 +99,14 @@ void Client::Update() {
     parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
 
     if (parsedResponse != nullptr) {
-        if(m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") == 0){
-            setConnexionState(CONNECTED_TO_SERVER);
+        if(m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION ){
+            char **ptrCode = parsedResponse;
+            while (*ptrCode != nullptr) {
+                if (strcmp(*ptrCode, "001") == 0) {
+                    setConnexionState(CONNECTED_TO_SERVER);
+                }
+                ++ptrCode;
+            }       
         }
         else if (m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") != 0) {
             setConnexionState(AWAITING_CONNEXION);
@@ -126,7 +126,7 @@ void Client::Update() {
                 {
                     char *channelToken = *(ptrCode + 2);
                     if(channelToken != nullptr){
-                        channels[channelCount] = strdup(channelToken);
+                        channels.push_back(channelToken);
                         channelCount++;
                     }  
                     haveChannel = true;
@@ -145,7 +145,7 @@ void Client::Update() {
                     while (*userPtr != nullptr)
                     {
 
-                        if (strcmp(*userPtr, "366") == 0)
+                        if (*userPtr != nullptr && strcmp(*userPtr, "366") == 0)
                         {
                             break;
                         }
@@ -177,8 +177,6 @@ void Client::Update() {
 void Client::Draw() {
     // Library/rllmGui/example/simple
     // https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
-
-    rlImGuiBegin();
 
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0,0));
@@ -258,7 +256,7 @@ void Client::Draw() {
                 {
                     bool is_selected = (item_selected_idx == n);
                     ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
-                    if (ImGui::Selectable(channels[n], is_selected, flags))
+                    if (ImGui::Selectable(channels[n].c_str(), is_selected, flags))
                     {
                         if (item_selected_idx != n)
                         {
@@ -266,7 +264,7 @@ void Client::Draw() {
                             if(!m_FirstJoin){
                                 strcpy(strOldChannel, strChannel);
                             }
-                            strcpy(strChannel, channels[item_selected_idx]);
+                            strcpy(strChannel, channels[item_selected_idx].c_str());
                             m_connexionState = JOINNIG_CHANNEL;
                         }
                     }
@@ -327,11 +325,10 @@ void Client::Draw() {
             }
         }
     }
-    rlImGuiEnd();
+
 }
 
 void Client::End() {
-    rlImGuiShutdown();
     ConnectIRC::Shutdown();
 }
 

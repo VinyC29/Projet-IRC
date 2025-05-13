@@ -4,6 +4,7 @@
 #include "IRC_Interface.h"
 #include "server/server.h"
 #include "client/client.h"
+#include "rlImGui.h"
 
 IRC_Interface* app = NULL;
 
@@ -25,19 +26,24 @@ void raylib_start(void){
 
 
     app->Start(false, "127.0.0.1");
+    
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 
+	rlImGuiSetup(true);
+    
     while(!WindowShouldClose()){
         ClearBackground(background);
         BeginDrawing();
         //TODO: Do stuff
 
         app->Update();
+        rlImGuiBegin();
         app->Draw();
-
+        rlImGuiEnd();
         EndDrawing();
     }
 
     app->End();
-
+    rlImGuiShutdown();
     CloseWindow();
 }

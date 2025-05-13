@@ -7,7 +7,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <stdio.h>
 
-#include "rlImGui.h"
+// #include "rlImGui.h"
 #include "imgui.h"
 
 Server::Server(float w,float h) : m_Width(w), m_Height(h)  {
@@ -98,11 +98,6 @@ char* Server::ProcessMessage(char** parsedResponse) {
 /* -------- ↓ ----------- ↓ -------- */
 
 void Server::Start(bool secureBoolean, const char* url) {
-
-    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
-
-	rlImGuiSetup(true);
-
     Channel myChannel = CreateChannel("#Default");
     Channel myChannel1 = CreateChannel("#DefaultAlt");
     channels.push_back(myChannel);
@@ -111,8 +106,6 @@ void Server::Start(bool secureBoolean, const char* url) {
     //WriteFileMessage(channels.at(0), "Yooo");     // This won't work and I have no idea why
     //WriteFileMessage(channels.at(0), "Heyyy");    // This won't work and I have no idea why
     
-    hostURL = url;
-
     serverSocket = ConnectIRC::CreateSocket();
     ConnectIRC::Connect(&serverSocket, secureBoolean, url, true);
 
@@ -150,8 +143,6 @@ void Server::Update() {
 }
 
 void Server::Draw() {
-    rlImGuiBegin();
-
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0, 0));
 
@@ -174,8 +165,6 @@ void Server::Draw() {
             ImGui::Text("No clients connected.");
         }
     }
-
-    rlImGuiEnd();
 }
 
 

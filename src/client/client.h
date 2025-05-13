@@ -2,6 +2,8 @@
 #include "IRC_Interface.h"
 #include <WinSock2.h>
 #include <iostream>
+#include <vector>
+#include <string>
 
 enum ClientState
 {
@@ -31,7 +33,7 @@ private:
     char strNick[256] = {0};
     char strUser[256] = {0};
     char strMsg [256] = {0};
-    char* channels[256] = {0};
+    std::vector<std::string> channels;
     char *chatHistory [256] = {0};
     char *userChannels[256] = {0};
     SOCKET socket;
