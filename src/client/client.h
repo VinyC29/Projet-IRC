@@ -1,6 +1,7 @@
 #pragma once
 #include "IRC_Interface.h"
 #include <WinSock2.h>
+#include <iostream>
 
 enum ClientState
 {
@@ -19,6 +20,7 @@ private:
     float m_Width;
     float m_Height;
     int channelCount = 0;
+    int chatHistoryCount = 0;
     bool m_Secure;
     bool m_Channel = false;
     bool m_FirstJoin = true; 
@@ -29,6 +31,7 @@ private:
     char strUser[256] = {0};
     char strMsg [256] = {0};
     char* channels[256] = {0};
+    char *chatHistory [256] = {0};
     SOCKET socket;
     WSAData wsaData;
     WORD DllVersion = MAKEWORD(2, 1);

@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <cstring>
 #include <string>
-#include <iostream>
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib.h"
@@ -73,7 +72,6 @@ void Client::Update() {
             char partChannel[256] = {0};
             snprintf(partChannel, 256, "PART %s\r\n", strOldChannel);
             ConnectIRC::SendMsg(&socket, partChannel);
-            std::cout << "Part Channel" << std::endl;
         }
 
         char joinChannel[256] = {0};
@@ -95,6 +93,13 @@ void Client::Update() {
         std::cout << msg << std::endl;
         ConnectIRC::SendMsg(&socket, msg);
         m_SendingMsg = false;
+
+        if(chatHistoryCount < 256){
+            char message [512];
+            snprintf(message, 512, "<%s> %s", strNick, strMsg);
+            chatHistory[chatHistoryCount] = _strdup(message);
+            chatHistoryCount++;
+        }
     }
 
     char **parsedResponse;
@@ -247,6 +252,13 @@ void Client::Draw() {
 
         ImGui::SetCursorPos(ImVec2(225, 50));
         ImGui::BeginChild("ChatMessages", ImVec2(825, 300), true, ImGuiWindowFlags_HorizontalScrollbar);
+        for (int i = 0; i < chatHistoryCount; ++i)
+        {
+            if (chatHistory[i])
+            {
+                ImGui::TextWrapped("%s", chatHistory[i]);
+            }
+        }
         ImGui::EndChild();
 
         ImGui::SetCursorPos(ImVec2(225, 375));
