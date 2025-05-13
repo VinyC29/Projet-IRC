@@ -4,47 +4,79 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
+#include <string>
+#include <iostream>>
 #include "imgui.h"
 #include "rlImGui.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "client.h"
-#include <cstring>
-#include <string>
-#define PORT 6667
-    
-enum ClientState
-{
-    AWAITING_CONNEXION,
-    AWAIT_SERVER_ANSWER_TO_CONNEXION,
-    CONNECTED_TO_SERVER
-};
+#include "connectIRC.h"
+#define PORT "6667"
+#define URL "testnet.ergo.chat"
 
-ClientState connexionstate = AWAITING_CONNEXION;
-bool test = true;
 static  std::string connexionMessage = "";
 
-
 Client::Client(float w,float h) : m_Width(w), m_Height(h)  {
-
+    
 }
 
 void Client::Start(bool secure, const char* url) {
+    bool m_Secure = secure;
 
-	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+    setConnexionState(AWAITING_CONNEXION);
+
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
 
 	rlImGuiSetup(true);
 
+   
+  
 }
 
 void Client::Update() {
-    
-    if(connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION){
-        // Avec la repoonse du serveur si le nick ou le user est deja utiliser
-        // connexionMessage = "Nick already in use";
 
-        // Avec la repoonse du serveur si la connexion a echouer
-        //connexionMessage = "Connexion failed";
+    if (m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER)
+    {
+        WSAStartup(DllVersion, &wsaData);
+        socket = ConnectIRC::CreateSocket();
+        ConnectIRC::Connect(&socket, m_Secure, URL, false);
+        u_long iMode = 1;
+        ioctlsocket(socket, FIONBIO, &iMode);
+        char nick[256] = {0};
+        snprintf(nick, 256, "NICK %s\r\n", strNick);
+        char *sendNick = nick;
+
+        char user[256] = {0};
+        snprintf(user, 256, "USER %s 0 **: %s\r\n", strNick, strUser);
+        char *sendUser = user;
+
+        ConnectIRC::SendMsg(&socket, sendNick);
+        ConnectIRC::SendMsg(&socket, sendUser);
+
+        setConnexionState(AWAIT_SERVER_ANSWER_TO_CONNEXION);
+    }
+
+
+
+    char **parsedResponse;
+    parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
+
+    if (parsedResponse != nullptr) {
+        if(m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") == 0){
+            setConnexionState(CONNECTED_TO_SERVER);
+        }
+        else if (m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION && strcmp(parsedResponse[1], "001") != 0) {
+            setConnexionState(AWAITING_CONNEXION);
+        }
+
+        char **ptr = parsedResponse;
+        while (*ptr != nullptr) {
+            
+            std::cout << *ptr << std::endl;
+            ++ptr;
+        }
     }
 }
 
@@ -57,14 +89,14 @@ void Client::Draw() {
     ImGui::SetWindowSize(ImVec2(m_Width, m_Height));
     ImGui::SetWindowPos(ImVec2(0,0));
 
-    if (connexionstate == AWAITING_CONNEXION || connexionstate == AWAIT_SERVER_ANSWER_TO_CONNEXION)
+    if (m_connexionState == AWAITING_CONNEXION || m_connexionState == SENDING_CONNEXION_INFO_TO_SERVER || m_connexionState == AWAIT_SERVER_ANSWER_TO_CONNEXION)
     {
         ImGui::SetCursorPos(ImVec2(50, 100));
-        static char strNick[256];
-        ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
+        strNick[256];
+        ImGui::InputTextWithHint("Nickname", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
 
         ImGui::SetCursorPos(ImVec2(50, 135));
-        static char strUser[256];
+        strUser[256];
         ImGui::InputTextWithHint("Username", "Input username here", strUser, IM_ARRAYSIZE(strUser));
         
         ImGui::SetCursorPos(ImVec2(50, 170));
@@ -112,7 +144,7 @@ void Client::Draw() {
                 showConnexionMessage = true;
             }
             else{
-                connexionstate = AWAIT_SERVER_ANSWER_TO_CONNEXION;
+                setConnexionState(SENDING_CONNEXION_INFO_TO_SERVER);
                 connexionMessage = ("Awaiting for server answer.");
                 showConnexionMessage = true;
             }
@@ -120,7 +152,7 @@ void Client::Draw() {
             clicked = 0;
         }
 	}    
-    else if(connexionstate == CONNECTED_TO_SERVER){
+    else if(m_connexionState == CONNECTED_TO_SERVER){
         ImGui::SetCursorPos(ImVec2(50, 100));
         static char strNick[256];
         ImGui::InputTextWithHint("Nicknane", "Input nickname here", strNick, IM_ARRAYSIZE(strNick));
@@ -132,9 +164,11 @@ void Client::Draw() {
     rlImGuiEnd();
 }
 
-     
-
-
 void Client::End() {
     rlImGuiShutdown();
+    ConnectIRC::Shutdown();
+}
+
+void Client::setConnexionState(ClientState state){
+    m_connexionState = state;
 }
