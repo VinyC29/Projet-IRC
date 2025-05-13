@@ -12,7 +12,7 @@
         "args": [],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}/Deployment",
-        "preLaunchTask": "Build server", // Make sure to delete the build folder when switching between build server/client.
+        "preLaunchTask": "Build client", // Make sure to delete the build folder when switching between build server/client.
         "console": "externalTerminal"
       },
       {
@@ -26,6 +26,19 @@
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}",
         "preLaunchTask": "Build knob"
+      }
+      ,
+      {
+        "name": "(tests) Launch",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "windows": {
+          "program": "${workspaceFolder}/tests/tests.com",
+        },
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceRoot}",
+        "preLaunchTask": "Build tests"
       }
     ]
         

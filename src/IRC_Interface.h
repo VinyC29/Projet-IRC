@@ -2,6 +2,13 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOGDI
 #define NOUSER
+#define NOMINMAX
+
+#undef LoadImage
+#undef DrawText
+#undef DrawTextEx
+#undef PlaySound
+
 class IRC_Interface {
 
 public:
