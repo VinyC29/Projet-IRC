@@ -21,7 +21,8 @@ private:
     int channelCount = 0;
     bool m_Secure;
     bool m_Channel = false;
-    bool m_FirstJoin = true;
+    bool m_FirstJoin = true; 
+    bool m_SendingMsg = false;
     char strChannel[256] = {0};
     char strOldChannel[256] = {0};
     char strNick[256] = {0};

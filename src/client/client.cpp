@@ -89,6 +89,14 @@ void Client::Update() {
         }
     }
 
+    if(m_SendingMsg && !m_FirstJoin){
+        char msg[512] = {0};
+        snprintf(msg, 512, "PRIVMSG %s :%s\r\n", strChannel, strMsg);
+        std::cout << msg << std::endl;
+        ConnectIRC::SendMsg(&socket, msg);
+        m_SendingMsg = false;
+    }
+
     char **parsedResponse;
     parsedResponse = ConnectIRC::ReceiveMsg(&socket, "\r\n ");
 
@@ -237,17 +245,22 @@ void Client::Draw() {
             }
         }
 
-        ImGui::SetCursorPos(ImVec2(225, 400));
-        static char strMsg[256] = "";
+        ImGui::SetCursorPos(ImVec2(225, 50));
+        ImGui::BeginChild("ChatMessages", ImVec2(825, 300), true, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::EndChild();
+
+        ImGui::SetCursorPos(ImVec2(225, 375));
+        strMsg[256];
         ImGui::InputTextMultiline("##ChatInput", strMsg, IM_ARRAYSIZE(strMsg), ImVec2(600, 100));
 
         static int clicked = 0;
         static bool showConnexionMessage = false;
         
-        ImGui::SetCursorPos(ImVec2(850, 400));
+        ImGui::SetCursorPos(ImVec2(850, 375));
         if (ImGui::Button("Send Message", ImVec2(200, 100)))
         {
             clicked++;
+            m_SendingMsg = true;
         }
     }
     rlImGuiEnd();
