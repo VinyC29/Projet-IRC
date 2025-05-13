@@ -21,6 +21,7 @@ private:
     float m_Height;
     int channelCount = 0;
     int chatHistoryCount = 0;
+    int channelUsers = 0;
     bool m_Secure;
     bool m_Channel = false;
     bool m_FirstJoin = true; 
@@ -32,6 +33,7 @@ private:
     char strMsg [256] = {0};
     char* channels[256] = {0};
     char *chatHistory [256] = {0};
+    char *userChannels[256] = {0};
     SOCKET socket;
     WSAData wsaData;
     WORD DllVersion = MAKEWORD(2, 1);

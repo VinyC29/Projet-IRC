@@ -80,6 +80,7 @@ void Client::Update() {
         snprintf(chatHistory, 256, "CHATHISTORY LATEST %s * 50\r\n", strChannel);
 
         ConnectIRC::SendMsg(&socket, joinChannel);
+        ConnectIRC::SendMsg(&socket, chatHistory);
         m_connexionState = CONNECTED_TO_SERVER;
         
         if(m_FirstJoin){
@@ -120,18 +121,31 @@ void Client::Update() {
         }
 
 
-        char **prtchannel = parsedResponse;
+        char **ptrCode = parsedResponse;
 
-            while (*prtchannel != nullptr) {
-                if (strcmp(*prtchannel, "322") == 0) {
-                    char* channelToken = *(prtchannel + 2);
+            while (*ptrCode != nullptr) {
+                if (strcmp(*ptrCode, "322") == 0)
+                {
+                    char *channelToken = *(ptrCode + 2);
                     if(channelToken != nullptr){
                         channels[channelCount] = strdup(channelToken);
                         channelCount++;
                     }  
-                    haveChannel = true; 
+                    haveChannel = true;
                 }
-                ++prtchannel;  
+
+                if (strcmp(*ptrCode, "366") == 0)
+                {
+                    ptrCode++;
+                    while (strcmp(*ptrCode, strChannel) == 0){
+                        char *userToken = *(ptrCode);
+                        userChannels[channelUsers] = strdup(userToken);
+                        channelUsers++;
+                        ptrCode++;
+                    }
+                }
+
+                ++ptrCode;
             }
                       
         char **ptr = parsedResponse;
@@ -224,7 +238,7 @@ void Client::Draw() {
 
         if(haveChannel){
             ImGui::Text("Available channels");
-            if (ImGui::BeginListBox("##listbox 2", ImVec2(200, 25 * ImGui::GetTextLineHeightWithSpacing())))
+            if (ImGui::BeginListBox("##listbox channels", ImVec2(200, 25 * ImGui::GetTextLineHeightWithSpacing())))
             {
                 for (int n = 0; n < channelCount; n++)
                 {
@@ -273,6 +287,29 @@ void Client::Draw() {
         {
             clicked++;
             m_SendingMsg = true;
+        }
+
+        if (!m_FirstJoin)
+        {
+            if (ImGui::BeginListBox("##listbox users", ImVec2(1075, 25 * ImGui::GetTextLineHeightWithSpacing())))
+            {
+                for (int n = 0; n < channelUsers; n++)
+                {
+                    bool is_selected1 = (item_selected_idx == n);
+                    ImGuiSelectableFlags flags = (item_highlighted_idx == n) ? ImGuiSelectableFlags_Highlight : 0;
+                    if (ImGui::Selectable(userChannels[n], is_selected1, flags))
+                    {
+                        if (item_selected_idx != n)
+                        {
+                            item_selected_idx = n;
+                        }
+                    }
+                    // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                    if (is_selected1)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndListBox();
+            }
         }
     }
     rlImGuiEnd();
