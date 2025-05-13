@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#include <iostream>
 
 using namespace std;
 
@@ -29,6 +30,7 @@ pirc_socket ConnectIRC::CreateSocket() {
     return sock;
 }
 
+
 void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const char* address, const bool isServer) {
 
     int port = 6667;
@@ -46,7 +48,7 @@ void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const
         bind(*connectingSocket, (const sockaddr*)&sin, sizeof(sin));
     
     } else {
-
+            
         struct addrinfo *ptr = NULL;
         struct addrinfo hints;
 
@@ -55,8 +57,11 @@ void ConnectIRC::Connect(pirc_socket* connectingSocket, const bool secure, const
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         
-        getaddrinfo(address, (PCSTR)port, &hints, &ptr);
-        
+        char portStr[6];
+        snprintf(portStr, sizeof(portStr), "%d", port);
+
+        getaddrinfo(address, portStr, &hints, &ptr);
+
         connect(*connectingSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
 
         freeaddrinfo(ptr);

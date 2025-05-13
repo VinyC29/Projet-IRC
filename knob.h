@@ -1687,6 +1687,7 @@ int knob_config_build(Knob_Config* config,Knob_File_Paths* outs){
         }
     }
     knob_sb_append_cstr(&sb_cmp,compilerpp_names[config->compiler][0]);
+    knob_sb_append_null(&sb_cmp);
     //@TODO: Add if to compiler_path when we have it
     for(int i =0; i < config->cpp_files.count;++i){
         cmd.count = 0;
@@ -1732,6 +1733,7 @@ int knob_config_build(Knob_Config* config,Knob_File_Paths* outs){
         }
     }
     knob_sb_append_cstr(&sb_cmp,compiler_names[config->compiler][0]);
+    knob_sb_append_null(&sb_cmp);
     for(int i =0; i < config->c_files.count;++i){
         cmd.count = 0;
         filepath = config->c_files.items[i];

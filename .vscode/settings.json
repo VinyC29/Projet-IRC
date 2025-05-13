@@ -93,6 +93,15 @@
         "cfloat": "c",
         "climits": "c",
         "*.m": "c"
+        "coroutine": "cpp",
+        "forward_list": "cpp",
+        "iomanip": "cpp",
+        "mutex": "cpp",
+        "ratio": "cpp",
+        "sstream": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "xstddef": "cpp"
     },
     "cmake.configureOnOpen": false
 }

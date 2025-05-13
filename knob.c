@@ -205,7 +205,7 @@ MAIN(irc_test){
         // knob_clean_dir("."PATH_SEP"build");
     }
     if(knob_cstr_match(subcommand,"build")){
-
+        
     }
     if(knob_cstr_match(subcommand,"tests")){
         if(!build_tests(config)){return 1;}
